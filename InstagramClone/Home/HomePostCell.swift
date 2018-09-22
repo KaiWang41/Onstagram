@@ -136,7 +136,15 @@ class HomePostCell: UICollectionViewCell {
         
         let timeAgoDisplay = post.creationDate.timeAgoDisplay()
         attributedText.append(NSAttributedString(string: timeAgoDisplay, attributes: [NSAttributedStringKey.font: UIFont.systemFont(ofSize: 14), NSAttributedStringKey.foregroundColor: UIColor.gray]))
+        
+        // Location
+        if post.location != "" {
+            let location = "\n" + post.location
+            attributedText.append(NSAttributedString(string: location, attributes: [NSAttributedStringKey.font: UIFont.systemFont(ofSize: 14), NSAttributedStringKey.foregroundColor: UIColor.gray]))
+        }
+        
         captionLabel.attributedText = attributedText
+        
     }
     
     private func setLikes(to value: Int, likers: [String]) {

@@ -8,9 +8,14 @@
 
 import UIKit
 import Firebase
+import CoreLocation
 
-class HomeController: HomePostCellViewController {
+class HomeController: HomePostCellViewController, CLLocationManagerDelegate {
    
+    // Loation
+    let locationManager = CLLocationManager()
+    var location: CLLocation?
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         configureNavigationBar()
@@ -26,24 +31,44 @@ class HomeController: HomePostCellViewController {
         refreshControl.addTarget(self, action: #selector(handleRefresh), for: .valueChanged)
         collectionView?.refreshControl = refreshControl
         
-        fetchAllPosts()
+        fetchAllPosts(sort: "time")
+        
+        // Location
+
+            locationManager.delegate = self
+            locationManager.desiredAccuracy = kCLLocationAccuracyNearestTenMeters
+            locationManager.startUpdatingLocation()
+        
+        
+    }
+    
+    // Location
+    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+        
+        location = manager.location
+        manager.stopUpdatingLocation()
+    }
+    
+    func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
+        
+        print("location error: ", error)
     }
     
     private func configureNavigationBar() {
         navigationItem.titleView = UIImageView(image: #imageLiteral(resourceName: "logo").withRenderingMode(.alwaysOriginal))
         navigationItem.leftBarButtonItem = UIBarButtonItem(image: #imageLiteral(resourceName: "camera3").withRenderingMode(.alwaysOriginal), style: .plain, target: self, action: #selector(handleCamera))
-        navigationItem.rightBarButtonItem = UIBarButtonItem(image: #imageLiteral(resourceName: "inbox").withRenderingMode(.alwaysOriginal), style: .plain, target: self, action: nil)
+        navigationItem.rightBarButtonItem = UIBarButtonItem(image: #imageLiteral(resourceName: "inbox").withRenderingMode(.alwaysOriginal), style: .plain, target: self, action: #selector(handleSort))
         navigationItem.backBarButtonItem = UIBarButtonItem(title: "", style: .plain, target: nil, action: nil)
         navigationItem.backBarButtonItem?.tintColor = .black
     }
     
-    private func fetchAllPosts() {
+    private func fetchAllPosts(sort: String) {
         showEmptyStateViewIfNeeded()
-        fetchPostsForCurrentUser()
-        fetchFollowingUserPosts()
+        fetchPostsForCurrentUser(sort: sort)
+        fetchFollowingUserPosts(sort: sort)
     }
     
-    private func fetchPostsForCurrentUser() {
+    private func fetchPostsForCurrentUser(sort: String) {
         guard let currentLoggedInUserId = Auth.auth().currentUser?.uid else { return }
         
         collectionView?.refreshControl?.beginRefreshing()
@@ -51,10 +76,16 @@ class HomeController: HomePostCellViewController {
         Database.database().fetchPostsForUser(withUID: currentLoggedInUserId, completion: { (posts) in
             self.posts.append(contentsOf: posts)
             
-            self.posts.sort(by: { (p1, p2) -> Bool in
-                return p1.creationDate.compare(p2.creationDate) == .orderedDescending
-            })
-            
+            if sort == "time" {
+                self.posts.sort(by: { (p1, p2) -> Bool in
+                    return p1.creationDate.compare(p2.creationDate) == .orderedDescending
+                })
+            } else {
+                self.posts.sort(by: { (p1, p2) -> Bool in
+                    return self.getDistance(post: p1) <= self.getDistance(post: p2)
+                })
+            }
+                
             self.collectionView?.reloadData()
             self.collectionView?.refreshControl?.endRefreshing()
         }) { (err) in
@@ -62,7 +93,7 @@ class HomeController: HomePostCellViewController {
         }
     }
     
-    private func fetchFollowingUserPosts() {
+    private func fetchFollowingUserPosts(sort: String) {
         guard let currentLoggedInUserId = Auth.auth().currentUser?.uid else { return }
         
         collectionView?.refreshControl?.beginRefreshing()
@@ -76,9 +107,15 @@ class HomeController: HomePostCellViewController {
                     
                     self.posts.append(contentsOf: posts)
                     
-                    self.posts.sort(by: { (p1, p2) -> Bool in
-                        return p1.creationDate.compare(p2.creationDate) == .orderedDescending
-                    })
+                    if sort == "time" {
+                        self.posts.sort(by: { (p1, p2) -> Bool in
+                            return p1.creationDate.compare(p2.creationDate) == .orderedDescending
+                        })
+                    } else {
+                        self.posts.sort(by: { (p1, p2) -> Bool in
+                            return self.getDistance(post: p1) <= self.getDistance(post: p2)
+                        })
+                    }
                     
                     self.collectionView?.reloadData()
                     self.collectionView?.refreshControl?.endRefreshing()
@@ -89,6 +126,15 @@ class HomeController: HomePostCellViewController {
             })
         }) { (err) in
             self.collectionView?.refreshControl?.endRefreshing()
+        }
+    }
+    
+    // Calculate post location distance to current location.
+    func getDistance(post: Post) -> Double {
+        if let location = location {
+            return location.distance(from: CLLocation(latitude: post.latitude, longitude: post.longitude))
+        } else {
+            return 0
         }
     }
     
@@ -111,12 +157,28 @@ class HomeController: HomePostCellViewController {
     
     @objc private func handleRefresh() {
         posts.removeAll()
-        fetchAllPosts()
+        fetchAllPosts(sort: "time")
     }
     
     @objc private func handleCamera() {
         let cameraController = CameraController()
         present(cameraController, animated: true, completion: nil)
+    }
+    
+    // Sort by date time or location (nearest).
+    @objc private func handleSort() {
+        let ac = UIAlertController(title: nil, message: "Sort By", preferredStyle: .actionSheet)
+        ac.addAction(UIAlertAction(title: "Date/Time", style: .default, handler: { _ in
+            
+            self.handleRefresh()
+        }))
+        ac.addAction(UIAlertAction(title: "Location", style: .default, handler: { _ in
+            
+            self.posts.removeAll()
+            self.fetchAllPosts(sort: "location")
+        }))
+        ac.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
+        present(ac, animated: true)
     }
     
     override func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {

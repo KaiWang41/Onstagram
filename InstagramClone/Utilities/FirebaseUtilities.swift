@@ -8,7 +8,6 @@
 
 import Foundation
 import Firebase
-import CoreLocation
 
 extension Auth {
     func createUser(withEmail email: String, username: String, password: String, image: UIImage?, completion: @escaping (Error?) -> ()) {
@@ -201,14 +200,14 @@ extension Database {
     
     //MARK: Posts
     
-    func createPost(withImage image: UIImage, caption: String, latitude: Double, longitude: Double, completion: @escaping (Error?) -> ()) {
+    func createPost(withImage image: UIImage, caption: String, latitude: Double, longitude: Double, location: String, completion: @escaping (Error?) -> ()) {
         guard let uid = Auth.auth().currentUser?.uid else { return }
         let userPostRef = Database.database().reference().child("posts").child(uid).childByAutoId()
         
         let postId = userPostRef.key
         
         Storage.storage().uploadPostImage(image: image, filename: postId) { (postImageUrl) in
-            let values = ["imageUrl": postImageUrl, "caption": caption, "imageWidth": image.size.width, "imageHeight": image.size.height, "creationDate": Date().timeIntervalSince1970, "id": postId, "latitude": latitude, "longitude": longitude] as [String : Any]
+            let values = ["imageUrl": postImageUrl, "caption": caption, "imageWidth": image.size.width, "imageHeight": image.size.height, "creationDate": Date().timeIntervalSince1970, "id": postId, "latitude": latitude, "longitude": longitude, "location": location] as [String : Any]
             
             userPostRef.updateChildValues(values) { (err, ref) in
                 if let err = err {

@@ -47,18 +47,22 @@ class SharePhotoController: UIViewController, CLLocationManagerDelegate {
         layoutViews()
         
         // Location services.
-        
-        locationManager.requestWhenInUseAuthorization()
-        if CLLocationManager.locationServicesEnabled() {
+
             locationManager.delegate = self
             locationManager.desiredAccuracy = kCLLocationAccuracyNearestTenMeters
             locationManager.startUpdatingLocation()
-        }
+        
     }
     
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         
-        self.location = locations.last
+        self.location = manager.location
+        manager.stopUpdatingLocation()
+    }
+    
+    func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
+        
+        print("location failure: ", error)
     }
     
     private func layoutViews() {
@@ -81,8 +85,9 @@ class SharePhotoController: UIViewController, CLLocationManagerDelegate {
         navigationItem.rightBarButtonItem?.isEnabled = false
         textView.isUserInteractionEnabled = false
         
-        // Location service.
-        locationManager.stopUpdatingLocation()
+        
+        
+        // Location
         var latitude = 90.0
         var longitude = 0.0
         if let location = location {
@@ -90,18 +95,55 @@ class SharePhotoController: UIViewController, CLLocationManagerDelegate {
             longitude = location.coordinate.longitude
         }
         
-        Database.database().createPost(withImage: postImage, caption: caption, latitude: latitude, longitude: longitude) { (err) in
-            if err != nil {
-                self.navigationItem.rightBarButtonItem?.isEnabled = true
-                self.textView.isUserInteractionEnabled = true
-                return
+        var place = ""
+        func createPost() {
+            Database.database().createPost(withImage: postImage, caption: caption, latitude: latitude, longitude: longitude, location: place) { (err) in
+                if err != nil {
+                    self.navigationItem.rightBarButtonItem?.isEnabled = true
+                    self.textView.isUserInteractionEnabled = true
+                    return
+                }
+                
+                NotificationCenter.default.post(name: NSNotification.Name.updateHomeFeed, object: nil)
+                NotificationCenter.default.post(name: NSNotification.Name.updateUserProfileFeed, object: nil)
+                self.dismiss(animated: true, completion: nil)
             }
-            
-            NotificationCenter.default.post(name: NSNotification.Name.updateHomeFeed, object: nil)
-            NotificationCenter.default.post(name: NSNotification.Name.updateUserProfileFeed, object: nil)
-            self.dismiss(animated: true, completion: nil)
         }
+        
+        if let location = location {
+            let geocoder = CLGeocoder()
+            geocoder.reverseGeocodeLocation(location) { (placemarks, error) in
+                
+                if error == nil {
+                    
+                    let placemark = placemarks?[0]
+                    if let tf = placemark?.thoroughfare {
+                        place.append(tf)
+                    }
+                    if let city = placemark?.subLocality {
+                        if place != "" { place.append(", ")}
+                        place.append(city)
+                    }
+                    if let state = placemark?.administrativeArea {
+                        if place != "" { place.append(", ")}
+                        place.append(state)
+                    }
+                    if let country = placemark?.country {
+                        if place != "" { place.append(", ")}
+                        place.append(country)
+                    }
+                    
+                    createPost()
+                }
+            }
+        } else {
+            createPost()
+        }
+        
+        
     }
+    
+    
 }
 
 
