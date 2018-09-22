@@ -8,8 +8,12 @@
 
 import UIKit
 import Firebase
+import CoreLocation
 
-class SharePhotoController: UIViewController {
+class SharePhotoController: UIViewController, CLLocationManagerDelegate {
+    
+    let locationManager = CLLocationManager()
+    var location: CLLocation?
     
     var selectedImage: UIImage? {
         didSet {
@@ -41,6 +45,20 @@ class SharePhotoController: UIViewController {
         view.backgroundColor = UIColor.rgb(red: 240, green: 240, blue: 240)
         navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Share", style: .plain, target: self, action: #selector(handleShare))
         layoutViews()
+        
+        // Location services.
+        
+        locationManager.requestWhenInUseAuthorization()
+        if CLLocationManager.locationServicesEnabled() {
+            locationManager.delegate = self
+            locationManager.desiredAccuracy = kCLLocationAccuracyNearestTenMeters
+            locationManager.startUpdatingLocation()
+        }
+    }
+    
+    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+        
+        self.location = locations.last
     }
     
     private func layoutViews() {
@@ -63,8 +81,16 @@ class SharePhotoController: UIViewController {
         navigationItem.rightBarButtonItem?.isEnabled = false
         textView.isUserInteractionEnabled = false
         
+        // Location service.
+        locationManager.stopUpdatingLocation()
+        var latitude = 90.0
+        var longitude = 0.0
+        if let location = location {
+            latitude = location.coordinate.latitude
+            longitude = location.coordinate.longitude
+        }
         
-        Database.database().createPost(withImage: postImage, caption: caption) { (err) in
+        Database.database().createPost(withImage: postImage, caption: caption, latitude: latitude, longitude: longitude) { (err) in
             if err != nil {
                 self.navigationItem.rightBarButtonItem?.isEnabled = true
                 self.textView.isUserInteractionEnabled = true
