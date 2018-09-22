@@ -14,7 +14,7 @@ protocol UserProfileHeaderDelegate {
     func didChangeToGridView()
 }
 
-class UserProfileHeader: UICollectionViewCell {
+class UserProfileHeader: UICollectionViewCell, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
    
     var delegate: UserProfileHeaderDelegate?
     
@@ -178,9 +178,31 @@ class UserProfileHeader: UICollectionViewCell {
         }
     }
     
+    
+    
     @objc private func handleTap() {
         guard let userId = user?.uid else { return }
-        if followButton.type == .edit { return }
+        if followButton.type == .edit {
+            
+            // Change profile image.
+            let imagePickerController = UIImagePickerController()
+            imagePickerController.delegate = self
+            
+            let ac = UIAlertController(title: "Profile Image", message: nil, preferredStyle: .actionSheet)
+            ac.addAction(UIAlertAction(title: "Photo Library", style: .default, handler: { (_) in
+                
+                imagePickerController.sourceType = .photoLibrary
+                self.window!.rootViewController!.present(imagePickerController, animated: true)
+            }))
+            ac.addAction(UIAlertAction(title: "Take Photo", style: .default, handler: { (_) in
+                
+                imagePickerController.sourceType = .camera
+                self.window!.rootViewController!.present(imagePickerController, animated: true)
+            }))
+            ac.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
+            self.window!.rootViewController!.present(ac, animated: true)
+            return
+        }
         
         let previousButtonType = followButton.type
         followButton.type = .loading
@@ -207,6 +229,22 @@ class UserProfileHeader: UICollectionViewCell {
         }
         
         NotificationCenter.default.post(name: NSNotification.Name.updateHomeFeed, object: nil)
+    }
+    
+    
+    // Image picker controller delegate.
+    func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [String : Any]) {
+        
+        let image = info[UIImagePickerControllerOriginalImage] as! UIImage
+        guard let userId = user?.uid else { return }
+        Storage.storage().uploadUserProfileImage(image: image, completion: { (profileImageUrl) in
+        Database.database().reference().child("users").child(userId).updateChildValues(["profileImageUrl": profileImageUrl])
+            
+            picker.dismiss(animated: true, completion: nil)
+            self.profileImageView.image = image
+            
+        })
+        
     }
     
     @objc private func handleChangeToGridView() {

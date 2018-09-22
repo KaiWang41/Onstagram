@@ -9,7 +9,7 @@
 import UIKit
 import Firebase
 
-class UserProfileController: HomePostCellViewController {
+class UserProfileController: HomePostCellViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
     
     var user: User? {
         didSet {
@@ -237,11 +237,13 @@ extension UserProfileController: UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
         return CGSize(width: view.frame.width, height: 200)
     }
+    
 }
 
 //MARK: - UserProfileHeaderDelegate
 
 extension UserProfileController: UserProfileHeaderDelegate {
+
     
     func didChangeToGridView() {
         isGridView = true

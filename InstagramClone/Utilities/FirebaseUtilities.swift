@@ -35,7 +35,7 @@ extension Auth {
 
 extension Storage {
     
-    fileprivate func uploadUserProfileImage(image: UIImage, completion: @escaping (String) -> ()) {
+    func uploadUserProfileImage(image: UIImage, completion: @escaping (String) -> ()) {
         guard let uploadData = UIImageJPEGRepresentation(image, 1) else { return } //changed from 0.3
         
         let storageRef = Storage.storage().reference().child("profile_images").child(NSUUID().uuidString)
