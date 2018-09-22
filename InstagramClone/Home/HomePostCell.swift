@@ -123,7 +123,7 @@ class HomePostCell: UICollectionViewCell {
         header.user = post.user
         photoImageView.loadImage(urlString: post.imageUrl)
         likeButton.setImage(post.likedByCurrentUser == true ? #imageLiteral(resourceName: "like_selected").withRenderingMode(.alwaysOriginal) : #imageLiteral(resourceName: "like_unselected").withRenderingMode(.alwaysOriginal), for: .normal)
-        setLikes(to: post.likes)
+        setLikes(to: post.likes, likers: post.likedUsers)
         setupAttributedCaption()
     }
     
@@ -139,11 +139,18 @@ class HomePostCell: UICollectionViewCell {
         captionLabel.attributedText = attributedText
     }
     
-    private func setLikes(to value: Int) {
+    private func setLikes(to value: Int, likers: [String]) {
         if value <= 0 {
             likeCounter.text = ""
-        } else if value == 1 {
-            likeCounter.text = "1 like"
+        
+        // Display liked users.
+        } else if value <= 5 {
+            var text = "Liked by "
+            for username in likers {
+                text.append(username + ", ")
+            }
+            
+            likeCounter.text = String(text.dropLast(2))
         } else {
             likeCounter.text = "\(value) likes"
         }

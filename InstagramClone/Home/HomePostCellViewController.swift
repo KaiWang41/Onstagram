@@ -98,10 +98,18 @@ class HomePostCellViewController: UICollectionViewController, HomePostCellDelega
                 }
                 post.likedByCurrentUser = false
                 post.likes = post.likes - 1
-                self.posts[indexPath.item] = post
-                UIView.performWithoutAnimation {
-                    self.collectionView?.reloadItems(at: [indexPath])
-                }
+                
+                // Remove from post liker.
+                Database.database().fetchUser(withUID: uid, completion: { (user) in
+                    post.likedUsers = post.likedUsers.filter { $0 != user.username}
+                    
+                    self.posts[indexPath.item] = post
+                    UIView.performWithoutAnimation {
+                        self.collectionView?.reloadItems(at: [indexPath])
+                    }
+                })
+                
+                
             }
         } else {
             let values = [uid : 1]
@@ -112,10 +120,18 @@ class HomePostCellViewController: UICollectionViewController, HomePostCellDelega
                 }
                 post.likedByCurrentUser = true
                 post.likes = post.likes + 1
-                self.posts[indexPath.item] = post
-                UIView.performWithoutAnimation {
-                    self.collectionView?.reloadItems(at: [indexPath])
-                }
+                
+                // Add to post liker.
+                Database.database().fetchUser(withUID: uid, completion: { (user) in
+                    post.likedUsers.append(user.username)
+                    
+                    self.posts[indexPath.item] = post
+                    UIView.performWithoutAnimation {
+                        self.collectionView?.reloadItems(at: [indexPath])
+                    }
+                })
+                
+                
             }
         }
     }  

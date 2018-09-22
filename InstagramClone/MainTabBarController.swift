@@ -17,7 +17,9 @@ class MainTabBarController: UITabBarController {
         tabBar.isTranslucent = false
         delegate = self
         
-        if (Auth.auth().currentUser == nil) || (!UserDefaults.standard.bool(forKey: "hasBeenLaunchedBeforeFlag")) {
+        if (Auth.auth().currentUser == nil)
+//            || (!UserDefaults.standard.bool(forKey: "hasBeenLaunchedBeforeFlag"))
+        {
             presentLoginController()
         } else {
             setupViewControllers()

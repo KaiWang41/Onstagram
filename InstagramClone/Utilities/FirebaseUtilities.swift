@@ -249,15 +249,30 @@ extension Database {
                             post.likedByCurrentUser = false
                         }
                    
-                        Database.database().numberOfLikesForPost(withPostId: postId, completion: { (count) in
+                    Database.database().numberOfLikesForPost(withPostId: postId, completion: { (count) in
                             post.likes = count
+                        
+                        // Liked users.
+                        Database.database().fetchLikedUsersForPost(withId: postId, completion: { (users) in
+                            
+                            for user in users {
+                                post.likedUsers.append(user.username)
+                            }
                             
                             posts.append(post)
                             
                             if posts.count == dictionaries.count {
                                 completion(posts)
                             }
+                        }, withCancel: { (error) in
+                            print(error.localizedDescription)
                         })
+                        })
+                        
+                        
+                        
+                        
+                        
                     }, withCancel: { (err) in
                         print("Failed to fetch like info for post:", err)
                     })
@@ -267,6 +282,41 @@ extension Database {
             print("Failed to fetch posts:", err)
         }
     }
+    
+    
+    
+    // Get all liked users for a post.
+    
+    func fetchLikedUsersForPost(withId id: String, completion: @escaping ([User]) -> (), withCancel cancel: ((Error) -> ())?) {
+        
+        let ref = Database.database().reference().child("likes").child(id)
+        
+        ref.observeSingleEvent(of: .value, with: { (snapshot) in
+            
+            guard let dictionaries = snapshot.value as? [String: Any] else {
+                completion([])
+                return
+            }
+            
+            var users = [User]()
+            dictionaries.forEach({ (uid, _) in
+                Database.database().fetchUser(withUID: uid, completion: { (user) in
+                    users.append(user)
+                    if users.count == dictionaries.count {
+                        completion(users)
+                    }
+                })
+            })
+            
+            
+        }) { (err) in
+            print("Failed to fetch post likers:", err)
+        }
+    }
+    
+    
+    
+    
     
     func deletePost(withUID uid: String, postId: String, completion: ((Error?) -> ())? = nil) {
         Database.database().reference().child("posts").child(uid).child(postId).removeValue { (err, _) in

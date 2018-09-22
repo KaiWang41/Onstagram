@@ -20,6 +20,9 @@ struct Post {
     var likes: Int = 0
     var likedByCurrentUser = false
     
+    // All liked users for the post.
+    var likedUsers = [String]()
+    
     init(user: User, dictionary: [String: Any]) {
         self.user = user
         self.imageUrl = dictionary["imageUrl"] as? String ?? ""
