@@ -38,13 +38,61 @@ class SharePhotoController: UIViewController, CLLocationManagerDelegate {
         return tv
     }()
     
+    let filtersScrollView = UIScrollView()
+    let imageToFilter = UIImageView()
+    
+    
     override var prefersStatusBarHidden: Bool { return true }
+    
+    var CIFilterNames = [
+        "CIPhotoEffectChrome",
+        "CIPhotoEffectFade",
+        "CIPhotoEffectInstant",
+        "CIPhotoEffectNoir",
+        "CIPhotoEffectProcess",
+        "CIPhotoEffectTonal",
+        "CIPhotoEffectTransfer",
+        "CISepiaTone"
+    ]
     
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = UIColor.rgb(red: 240, green: 240, blue: 240)
         navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Share", style: .plain, target: self, action: #selector(handleShare))
         layoutViews()
+        var xCoord: CGFloat = 5
+        let yCoord: CGFloat = 5
+        let buttonWidth:CGFloat = 70
+        let buttonHeight: CGFloat = 70
+        let gapBetweenButtons: CGFloat = 5
+        
+        
+        var itemCount = 0
+        
+        for i in 0..<CIFilterNames.count {
+            itemCount = i
+            
+            // Button properties
+            let filterButton = UIButton(type: .custom)
+            filterButton.frame = CGRect(origin: CGPoint(x:xCoord, y: yCoord), size: CGSize(width: buttonWidth, height: buttonHeight))
+            filterButton.tag = itemCount
+            filterButton.addTarget(self, action:#selector(filterButtonTapped), for: .touchUpInside)
+            filterButton.layer.cornerRadius = 6
+            filterButton.clipsToBounds = true
+            let ciContext = CIContext(options: nil)
+            let coreImage = CIImage(image: imageView.image!)
+            let filter = CIFilter(name: "\(CIFilterNames[i])" )
+            filter!.setDefaults()
+            filter!.setValue(coreImage, forKey: kCIInputImageKey)
+            let filteredImageData = filter!.value(forKey: kCIOutputImageKey) as! CIImage
+            let filteredImageRef = ciContext.createCGImage(filteredImageData, from: filteredImageData.extent)
+            let imageForButton = UIImage(cgImage: filteredImageRef!)
+            filterButton.setBackgroundImage(imageForButton, for: .normal)
+            xCoord +=  buttonWidth + gapBetweenButtons
+            filtersScrollView.addSubview(filterButton)
+        }
+        
+        filtersScrollView.contentSize = CGSize(width:buttonWidth * CGFloat(itemCount+2), height: yCoord)
         
         // Location services.
 
@@ -53,6 +101,13 @@ class SharePhotoController: UIViewController, CLLocationManagerDelegate {
             locationManager.startUpdatingLocation()
         
     }
+    
+    @objc func filterButtonTapped(sender: UIButton) {
+        let button = sender as UIButton
+        
+        imageToFilter.image = button.backgroundImage(for: UIControlState.normal)
+    }
+
     
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         
@@ -66,16 +121,18 @@ class SharePhotoController: UIViewController, CLLocationManagerDelegate {
     }
     
     private func layoutViews() {
-        let containerView = UIView()
-        containerView.backgroundColor = .white
+        let containerView  = UIView()
         view.addSubview(containerView)
-        containerView.anchor(top: view.safeAreaLayoutGuide.topAnchor, left: view.safeAreaLayoutGuide.leftAnchor, right: view.safeAreaLayoutGuide.rightAnchor, height: 100)
+        containerView.anchor(top: view.safeAreaLayoutGuide.topAnchor, left: view.safeAreaLayoutGuide.leftAnchor, right: view.safeAreaLayoutGuide.rightAnchor, height: UIScreen.main.bounds.width )
         
         containerView.addSubview(imageView)
-        imageView.anchor(top: containerView.topAnchor, left: containerView.leftAnchor, bottom: containerView.bottomAnchor, paddingTop: 8, paddingLeft: 8, paddingBottom: 8, width: 84)
+        imageView.anchor(top: containerView.topAnchor, left: containerView.leftAnchor, bottom: containerView.bottomAnchor, right: containerView.rightAnchor, height:UIScreen.main.bounds.width )
         
-        containerView.addSubview(textView)
-        textView.anchor(top: containerView.topAnchor, left: imageView.rightAnchor, bottom: containerView.bottomAnchor, right: containerView.rightAnchor, paddingLeft: 4)
+        containerView.addSubview(imageToFilter)
+        imageToFilter.anchor(top: containerView.topAnchor, left: containerView.leftAnchor, bottom: containerView.bottomAnchor, right: containerView.rightAnchor, height:UIScreen.main.bounds.width )
+
+        view.addSubview(filtersScrollView)
+        filtersScrollView.anchor( height: 0.3 * UIScreen.main.bounds.width)
     }
     
     @objc private func handleShare() {
