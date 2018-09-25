@@ -38,11 +38,14 @@ class SharePhotoController: UIViewController, CLLocationManagerDelegate {
         return tv
     }()
     
+    override var prefersStatusBarHidden: Bool { return true }
+    
+    // Filter
     let filtersScrollView = UIScrollView()
     let imageToFilter = UIImageView()
     
     
-    override var prefersStatusBarHidden: Bool { return true }
+    
     
     var CIFilterNames = [
         "CIPhotoEffectChrome",
@@ -59,7 +62,10 @@ class SharePhotoController: UIViewController, CLLocationManagerDelegate {
         super.viewDidLoad()
         view.backgroundColor = UIColor.rgb(red: 240, green: 240, blue: 240)
         navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Share", style: .plain, target: self, action: #selector(handleShare))
-        layoutViews()
+        
+        
+        
+        // Filter
         var xCoord: CGFloat = 5
         let yCoord: CGFloat = 5
         let buttonWidth:CGFloat = 70
@@ -92,7 +98,10 @@ class SharePhotoController: UIViewController, CLLocationManagerDelegate {
             filtersScrollView.addSubview(filterButton)
         }
         
+        
         filtersScrollView.contentSize = CGSize(width:buttonWidth * CGFloat(itemCount+2), height: yCoord)
+        
+        layoutViews()
         
         // Location services.
 
@@ -120,6 +129,8 @@ class SharePhotoController: UIViewController, CLLocationManagerDelegate {
         print("location failure: ", error)
     }
     
+    
+    // Filter
     private func layoutViews() {
         let containerView  = UIView()
         view.addSubview(containerView)
@@ -130,9 +141,10 @@ class SharePhotoController: UIViewController, CLLocationManagerDelegate {
         
         containerView.addSubview(imageToFilter)
         imageToFilter.anchor(top: containerView.topAnchor, left: containerView.leftAnchor, bottom: containerView.bottomAnchor, right: containerView.rightAnchor, height:UIScreen.main.bounds.width )
+        
 
         view.addSubview(filtersScrollView)
-        filtersScrollView.anchor( height: 0.3 * UIScreen.main.bounds.width)
+        filtersScrollView.anchor(top: containerView.bottomAnchor, left: view.safeAreaLayoutGuide.leftAnchor, right: view.safeAreaLayoutGuide.rightAnchor, paddingTop: 24, height: 0.3 * UIScreen.main.bounds.width)
     }
     
     @objc private func handleShare() {
