@@ -149,7 +149,7 @@ class SharePhotoController: UIViewController, CLLocationManagerDelegate {
     }
     
     @objc private func handleShare() {
-        guard let postImage = selectedImage else { return }
+        guard let postImage = imageToFilter.image else { return }
         guard let caption = textView.text else { return }
         
         navigationItem.rightBarButtonItem?.isEnabled = false
