@@ -142,9 +142,10 @@ class SharePhotoController: UIViewController, CLLocationManagerDelegate {
         containerView.addSubview(imageToFilter)
         imageToFilter.anchor(top: containerView.topAnchor, left: containerView.leftAnchor, bottom: containerView.bottomAnchor, right: containerView.rightAnchor, height:UIScreen.main.bounds.width )
         
-
+        view.addSubview(textView)
+        textView.anchor(top: containerView.bottomAnchor, left: view.safeAreaLayoutGuide.leftAnchor, right: view.safeAreaLayoutGuide.rightAnchor, paddingTop: 30, height:0.2 * UIScreen.main.bounds.width)
         view.addSubview(filtersScrollView)
-        filtersScrollView.anchor(top: containerView.bottomAnchor, left: view.safeAreaLayoutGuide.leftAnchor, right: view.safeAreaLayoutGuide.rightAnchor, paddingTop: 24, height: 0.3 * UIScreen.main.bounds.width)
+        filtersScrollView.anchor(top: textView.bottomAnchor, left: view.safeAreaLayoutGuide.leftAnchor, right: view.safeAreaLayoutGuide.rightAnchor, paddingTop: 50, height: 0.3 * UIScreen.main.bounds.width)
     }
     
     @objc private func handleShare() {
