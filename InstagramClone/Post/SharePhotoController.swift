@@ -5,7 +5,6 @@
 //  Created by Mac Gallagher on 7/27/18.
 //  Copyright © 2018 Mac Gallagher. All rights reserved.
 //
-
 import UIKit
 import Firebase
 import CoreLocation
@@ -44,6 +43,25 @@ class SharePhotoController: UIViewController, CLLocationManagerDelegate {
     let filtersScrollView = UIScrollView()
     let imageToFilter = UIImageView()
     
+    private let filterChoice : UIButton = {
+        let ub = UIButton()
+        ub.setTitle("Filter", for: .normal)
+        ub.titleLabel?.font = UIFont(name:"Times New Roman", size: 20)
+        ub.setTitleColor(.black, for: .normal)
+        ub.frame = CGRect(x: 0, y: 0, width: 50, height: 50)
+        
+        return ub
+    }()
+    
+    private let editChoice : UIButton = {
+        let ub = UIButton()
+        ub.setTitle("Edit", for: .normal)
+        ub.titleLabel?.font = UIFont(name:"Times New Roman", size: 20)
+        ub.setTitleColor(.black, for: .normal)
+        ub.frame = CGRect(x: 0, y: 0, width: 0.5 * UIScreen.main.bounds.width, height: 0.2 * UIScreen.main.bounds.height)
+        
+        return ub
+    }()
     
     
     
@@ -104,10 +122,9 @@ class SharePhotoController: UIViewController, CLLocationManagerDelegate {
         layoutViews()
         
         // Location services.
-
-            locationManager.delegate = self
-            locationManager.desiredAccuracy = kCLLocationAccuracyNearestTenMeters
-            locationManager.startUpdatingLocation()
+        locationManager.delegate = self
+        locationManager.desiredAccuracy = kCLLocationAccuracyNearestTenMeters
+        locationManager.startUpdatingLocation()
         
     }
     
@@ -116,7 +133,7 @@ class SharePhotoController: UIViewController, CLLocationManagerDelegate {
         
         imageToFilter.image = button.backgroundImage(for: UIControlState.normal)
     }
-
+    
     
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         
@@ -133,6 +150,7 @@ class SharePhotoController: UIViewController, CLLocationManagerDelegate {
     // Filter
     private func layoutViews() {
         let containerView  = UIView()
+        let choiceView = UIView()
         view.addSubview(containerView)
         containerView.anchor(top: view.safeAreaLayoutGuide.topAnchor, left: view.safeAreaLayoutGuide.leftAnchor, right: view.safeAreaLayoutGuide.rightAnchor, height: UIScreen.main.bounds.width )
         
@@ -146,6 +164,15 @@ class SharePhotoController: UIViewController, CLLocationManagerDelegate {
         textView.anchor(top: containerView.bottomAnchor, left: view.safeAreaLayoutGuide.leftAnchor, right: view.safeAreaLayoutGuide.rightAnchor, paddingTop: 30, height:0.2 * UIScreen.main.bounds.width)
         view.addSubview(filtersScrollView)
         filtersScrollView.anchor(top: textView.bottomAnchor, left: view.safeAreaLayoutGuide.leftAnchor, right: view.safeAreaLayoutGuide.rightAnchor, paddingTop: 50, height: 0.3 * UIScreen.main.bounds.width)
+        
+        view.addSubview(choiceView)
+        choiceView.anchor(left: view.safeAreaLayoutGuide.leftAnchor, bottom: view.safeAreaLayoutGuide.bottomAnchor, right: view.safeAreaLayoutGuide.rightAnchor, height: 50 )
+        
+        choiceView.addSubview(filterChoice)
+        filterChoice.anchor(top: choiceView.topAnchor, left: choiceView.leftAnchor, bottom: choiceView.bottomAnchor, width: 0.5 * UIScreen.main.bounds.width, height: 50)
+        
+        choiceView.addSubview(editChoice)
+        editChoice.anchor(top: choiceView.bottomAnchor, left: filterChoice.leftAnchor, bottom: choiceView.bottomAnchor, right: choiceView.rightAnchor, width: 0.5 * UIScreen.main.bounds.width, height: 50)
     }
     
     @objc private func handleShare() {
@@ -215,8 +242,5 @@ class SharePhotoController: UIViewController, CLLocationManagerDelegate {
     
     
 }
-
-
-
 
 
