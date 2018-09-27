@@ -169,7 +169,6 @@ class HomeController: HomePostCellViewController, CLLocationManagerDelegate, UII
         let imagePickerController = UIImagePickerController()
         imagePickerController.delegate = self
         imagePickerController.sourceType = .camera
-        imagePickerController.allowsEditing = true
         imagePickerController.showsCameraControls = true
         
         // Overlay grid
