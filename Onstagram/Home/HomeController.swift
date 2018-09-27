@@ -9,7 +9,7 @@ import UIKit
 import Firebase
 import CoreLocation
 
-class HomeController: HomePostCellViewController, CLLocationManagerDelegate {
+class HomeController: HomePostCellViewController, CLLocationManagerDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
    
     // Loation
     let locationManager = CLLocationManager()
@@ -164,10 +164,52 @@ class HomeController: HomePostCellViewController, CLLocationManagerDelegate {
         fetchAllPosts(sort: "time")
     }
     
+    // Take photo
     @objc private func handleCamera() {
-        let cameraController = CameraController()
-        present(cameraController, animated: true, completion: nil)
+        let imagePickerController = UIImagePickerController()
+        imagePickerController.delegate = self
+        imagePickerController.sourceType = .camera
+        imagePickerController.allowsEditing = true
+        imagePickerController.showsCameraControls = true
+        
+        // Overlay grid
+//        let gridImageView = UIImageView(image: UIImage(named: "grid_view"))
+//        
+//        imagePickerController.cameraOverlayView = gridImageView
+            
+        present(imagePickerController, animated: true)
     }
+    
+    // Image delegates
+    func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
+        picker.dismiss(animated: true, completion: nil)
+    }
+    func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [String : Any]) {
+        
+        let image = info[UIImagePickerControllerOriginalImage] as! UIImage
+        
+        let ac = UIAlertController(title: nil, message: "Save to library?", preferredStyle: .alert)
+        ac.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
+        ac.addAction(UIAlertAction(title: "Yes", style: .default, handler: { alert in
+            
+            picker.dismiss(animated: true, completion: nil)
+            UIImageWriteToSavedPhotosAlbum(image, self, #selector(self.image(_:didFinishSavingWithError:contextInfo:)), nil)
+        }))
+        
+        picker.present(ac, animated: true)
+    }
+    @objc func image(_ image: UIImage, didFinishSavingWithError error: NSError?, contextInfo info: UnsafeRawPointer) {
+        
+        if let _ = error {
+            Helper.presentError(sender: self, message: "Failed to save photo.\nPlease try again.")
+        } else {
+            let ac = UIAlertController(title: "Save Successful", message: nil, preferredStyle: .alert)
+            ac.addAction(UIAlertAction(title: "OK", style: .default))
+            present(ac, animated: true)
+        }
+    }
+    
+    
     
     // Sort by date time or location (nearest).
     @objc private func handleSort() {

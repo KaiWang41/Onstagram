@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import Firebase
 
 class Helper: NSObject {
 
@@ -15,4 +16,5 @@ class Helper: NSObject {
         ac.addAction(UIAlertAction(title: "OK", style: .destructive, handler: nil))
         sender.present(ac, animated: true)
     }
+    
 }

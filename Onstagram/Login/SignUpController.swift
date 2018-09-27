@@ -163,6 +163,10 @@ class SignUpController: UIViewController, UINavigationControllerDelegate {
         
         Auth.auth().createUser(withEmail: email, username: username, password: password, image: profileImage) { (err) in
             if err != nil {
+                
+                // Present error
+                Helper.presentError(sender: self, message: "Email already in use.\nPlease choose another one.")
+                
                 self.resetInputFields()
                 return
             }

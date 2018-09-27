@@ -120,10 +120,15 @@ class SharePhotoController: UIViewController, CLLocationManagerDelegate {
         
         layoutViews()
         
-        // Location services.
-        locationManager.delegate = self
-        locationManager.desiredAccuracy = kCLLocationAccuracyNearestTenMeters
-        locationManager.startUpdatingLocation()
+        // Location
+        if CLLocationManager.authorizationStatus() != .denied {
+            if !CLLocationManager.locationServicesEnabled() {
+                locationManager.requestWhenInUseAuthorization()
+            }
+            locationManager.delegate = self
+            locationManager.desiredAccuracy = kCLLocationAccuracyNearestTenMeters
+            locationManager.startUpdatingLocation()
+        }
         
     }
     
