@@ -2,7 +2,7 @@
 //  HomeController.swift
 //  Onstagram
 //
-//  Copyright © 2018 Group59. All rights reserved.
+//  See LICENSE file for license information.
 //
 
 import UIKit
@@ -33,10 +33,15 @@ class HomeController: HomePostCellViewController, CLLocationManagerDelegate {
         fetchAllPosts(sort: "time")
         
         // Location
-
+        if CLLocationManager.authorizationStatus() != .denied {
+            if !CLLocationManager.locationServicesEnabled() {
+                locationManager.requestWhenInUseAuthorization()
+            }
             locationManager.delegate = self
             locationManager.desiredAccuracy = kCLLocationAccuracyNearestTenMeters
             locationManager.startUpdatingLocation()
+        }
+        
         
         
     }

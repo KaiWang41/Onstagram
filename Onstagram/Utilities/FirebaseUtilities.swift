@@ -2,7 +2,7 @@
 //  FirebaseUtilities.swift
 //  Onstagram
 //
-//  Copyright © 2018 Group59. All rights reserved.
+//  See LICENSE file for license information.
 //
 
 import Foundation
@@ -205,7 +205,7 @@ extension Database {
         
         let postId = userPostRef.key
         
-        Storage.storage().uploadPostImage(image: image, filename: postId) { (postImageUrl) in
+        Storage.storage().uploadPostImage(image: image, filename: postId!) { (postImageUrl) in
             let values = ["imageUrl": postImageUrl, "caption": caption, "imageWidth": image.size.width, "imageHeight": image.size.height, "creationDate": Date().timeIntervalSince1970, "id": postId, "latitude": latitude, "longitude": longitude, "location": location] as [String : Any]
             
             userPostRef.updateChildValues(values) { (err, ref) in

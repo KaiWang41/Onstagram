@@ -2,7 +2,7 @@
 //  CustomAnimationPresentor.swift
 //  Onstagram
 //
-//  Copyright © 2018 Group59. All rights reserved.
+//  See LICENSE file for license information.
 //
 
 import UIKit
