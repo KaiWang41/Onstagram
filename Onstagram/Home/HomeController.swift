@@ -172,10 +172,10 @@ class HomeController: HomePostCellViewController, CLLocationManagerDelegate, UII
         imagePickerController.showsCameraControls = true
         
         // Overlay grid
-//        let gridImageView = UIImageView(image: UIImage(named: "grid_view"))
-//        
-//        imagePickerController.cameraOverlayView = gridImageView
-            
+        let gridImageView = UIImageView(image: UIImage(named: "light_grid"))
+        gridImageView.frame = CGRect(x: 0, y: 43, width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height - 115)
+        imagePickerController.cameraOverlayView = gridImageView
+        
         present(imagePickerController, animated: true)
     }
     
@@ -213,7 +213,7 @@ class HomeController: HomePostCellViewController, CLLocationManagerDelegate, UII
     // Sort by date time or location (nearest).
     @objc private func handleSort() {
         let ac = UIAlertController(title: nil, message: "Sort By", preferredStyle: .actionSheet)
-        ac.addAction(UIAlertAction(title: "Date/Time", style: .default, handler: { _ in
+        ac.addAction(UIAlertAction(title: "Date / Time", style: .default, handler: { _ in
             
             self.handleRefresh()
         }))
