@@ -23,6 +23,9 @@ class UserSearchController: UICollectionViewController {
     private var users = [User]()
     private var filteredUsers = [User]()
     
+    // Suggest users
+    private var suggestedUsers = [User]()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         navigationItem.titleView = searchBar
@@ -41,6 +44,36 @@ class UserSearchController: UICollectionViewController {
         searchBar.delegate = self
         
         fetchAllUsers()
+        
+        // Suggested users
+        fetchSuggestedUsers()
+    }
+    
+    // Suggest users
+    private func fetchSuggestedUsers() {
+        collectionView?.refreshControl?.beginRefreshing()
+        
+        let uid = Auth.auth().currentUser!.uid
+        
+        // 1. Followers
+        Database.database().fetchFollowers(forUID: uid, completion: { (followers) in
+            
+            self.suggestedUsers.append(contentsOf: followers)
+            
+            // 2. Following same user
+            Database.database().fetchUsersFollowingSameUser(forUID: uid, completion: { (users) in
+                
+                self.suggestedUsers.append(contentsOf: users)
+                
+                // 3. Liked same post
+                
+            })
+            
+//            self.filteredUsers = followers
+//            self.searchBar.text = ""
+//            self.collectionView?.reloadData()
+//            self.collectionView?.refreshControl?.endRefreshing()
+        })
     }
     
     override func viewWillDisappear(_ animated: Bool) {
@@ -50,21 +83,16 @@ class UserSearchController: UICollectionViewController {
     }
     
     private func fetchAllUsers() {
-        collectionView?.refreshControl?.beginRefreshing()
         
         Database.database().fetchAllUsers(includeCurrentUser: false, completion: { (users) in
             self.users = users
-            self.filteredUsers = users
-            self.searchBar.text = ""
-            self.collectionView?.reloadData()
-            self.collectionView?.refreshControl?.endRefreshing()
         }) { (_) in
-            self.collectionView?.refreshControl?.endRefreshing()
+            ()
         }
     }
     
     @objc private func handleRefresh() {
-        fetchAllUsers()
+        fetchSuggestedUsers()
     }
     
     override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
@@ -99,7 +127,7 @@ extension UserSearchController: UISearchBarDelegate {
     
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
         if searchText.isEmpty {
-            filteredUsers = users
+            filteredUsers = []
         } else {
             filteredUsers = users.filter { (user) -> Bool in
                 return user.username.lowercased().contains(searchText.lowercased())

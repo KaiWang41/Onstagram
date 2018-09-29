@@ -82,6 +82,74 @@ extension Database {
 
     //MARK: Users
     
+    // Fetch all followers for user
+    func fetchFollowers(forUID uid: String, completion: @escaping ([User]) -> ()) {
+        Database.database().reference().child("followers").child(uid).observeSingleEvent(of: .value, with: { (snapshot) in
+            
+            guard let dictionary = snapshot.value as? [String: Any] else {
+                completion([])
+                return
+            }
+            
+            var followers = [User]()
+            if dictionary.count == 0 {
+                completion(followers)
+            } else {
+                
+                dictionary.forEach({ (key, _) in
+                    
+                    Database.database().fetchUser(withUID: key, completion: { (user) in
+                        
+                        followers.append(user)
+                        if followers.count == dictionary.count {
+                            completion(followers)
+                        }
+                    })
+                })
+            }
+            
+        })
+    }
+    
+    // Fetch users following the same user
+    func fetchUsersFollowingSameUser(forUID uid: String, completion: @escaping ([User]) -> ()) {
+        Database.database().reference().child("following").child(uid).observeSingleEvent(of: .value, with: { (snapshot) in
+            
+            guard let dictionary = snapshot.value as? [String: Any] else {
+                completion([])
+                return
+            }
+            
+            var users = [User]()
+            if dictionary.count == 0 {
+                completion([])
+            } else {
+                
+                var n = 0
+                dictionary.forEach({ (key, _) in
+                    
+                    Database.database().fetchFollowers(forUID: key
+                        , completion: { (followers) in
+                            
+                            n += 1
+                            for follower in followers {
+                                if follower.uid != uid {
+                                    if !users.contains(follower) {
+                                        users.append(follower)
+                                    }
+                                }
+                            }
+                            
+                            if n == dictionary.count {
+                                completion(users)
+                            }
+                    })
+                })
+            }
+            
+        })
+    }
+    
     func fetchUser(withUID uid: String, completion: @escaping (User) -> ()) {
         Database.database().reference().child("users").child(uid).observeSingleEvent(of: .value, with: { (snapshot) in
             guard let userDictionary = snapshot.value as? [String: Any] else { return }
