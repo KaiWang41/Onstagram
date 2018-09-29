@@ -174,7 +174,7 @@ class HomeController: HomePostCellViewController, CLLocationManagerDelegate, UII
         // Overlay grid
         let gridImageView = UIImageView(image: UIImage(named: "light_grid"))
         gridImageView.contentMode = .scaleToFill
-        gridImageView.frame = CGRect(x: 0, y: 43, width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height - 160)
+        gridImageView.frame = imagePickerController.view!.frame
         imagePickerController.cameraOverlayView = gridImageView
         
         present(imagePickerController, animated: true)
