@@ -202,8 +202,9 @@ class HomeController: HomePostCellViewController, CLLocationManagerDelegate, UII
     }
     @objc func image(_ image: UIImage, didFinishSavingWithError error: NSError?, contextInfo info: UnsafeRawPointer) {
         
-        if let _ = error {
-            Helper.presentError(sender: self, message: "Failed to save photo.\nPlease try again.")
+        if let err = error {
+            let message = err.localizedDescription
+            Helper.presentError(sender: self, message: message)
         } else {
             let ac = UIAlertController(title: "Save Successful", message: nil, preferredStyle: .alert)
             ac.addAction(UIAlertAction(title: "OK", style: .default))

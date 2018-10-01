@@ -92,7 +92,8 @@ class HomePostCellViewController: UICollectionViewController, HomePostCellDelega
         if post.likedByCurrentUser {
             Database.database().reference().child("likes").child(post.id).child(uid).removeValue { (err, _) in
                 if let err = err {
-                    print("Failed to unlike post:", err)
+                    let message = err.localizedDescription
+                    Helper.presentError(sender: self, message: message)
                     return
                 }
                 post.likedByCurrentUser = false
@@ -114,7 +115,8 @@ class HomePostCellViewController: UICollectionViewController, HomePostCellDelega
             let values = [uid : 1]
             Database.database().reference().child("likes").child(post.id).updateChildValues(values) { (err, _) in
                 if let err = err {
-                    print("Failed to like post:", err)
+                    let message = err.localizedDescription
+                    Helper.presentError(sender: self, message: message)
                     return
                 }
                 post.likedByCurrentUser = true

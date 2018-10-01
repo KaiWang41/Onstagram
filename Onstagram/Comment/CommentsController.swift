@@ -108,6 +108,8 @@ extension CommentsController: CommentInputAccessoryViewDelegate {
         guard let postId = post?.id else { return }
         Database.database().addCommentToPost(withId: postId, text: comment) { (err) in
             if err != nil {
+                let message = err!.localizedDescription
+                Helper.presentError(sender: self, message: message)
                 return
             }
             self.commentInputAccessoryView.clearCommentTextField()

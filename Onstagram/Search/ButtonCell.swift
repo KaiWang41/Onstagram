@@ -11,6 +11,7 @@ class ButtonCell: UICollectionViewCell {
         let b = UIButton()
         b.backgroundColor = UIColor.lightGray
         b.setTitle("Search for People Nearby", for: .normal)
+        b.titleLabel?.font = UIFont.systemFont(ofSize: 14)
         b.addTarget(self, action: #selector(UserSearchController.toNearby), for: .touchUpInside)
         return b
     }()
@@ -29,7 +30,7 @@ class ButtonCell: UICollectionViewCell {
     
     private func sharedInit() {
         addSubview(button)
-        button.anchor(left: leftAnchor, right: rightAnchor,  paddingLeft: 60, paddingRight: 60, height: 40)
+        button.anchor(left: leftAnchor, right: rightAnchor,  paddingLeft: 70, paddingRight: 70, height: 40)
         button.centerYAnchor.constraint(equalTo: centerYAnchor).isActive = true
         button.layer.cornerRadius = 5
     }

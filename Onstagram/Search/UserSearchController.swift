@@ -88,9 +88,16 @@ class UserSearchController: UICollectionViewController {
                                 filteredSuggestedUsers.append(suggestedUser)
                             }
                         }
-                        self.suggestedUsers = filteredSuggestedUsers
                         
-                        // Show in collection view
+                        // Remove duplicates
+                        self.suggestedUsers = []
+                        for user in filteredSuggestedUsers {
+                            if !self.suggestedUsers.contains(user) {
+                                self.suggestedUsers.append(user)
+                            }
+                        }
+                        
+                        // Collection view
                         self.filteredUsers = self.suggestedUsers
                         self.searchBar.text = ""
                         self.collectionView?.reloadData()

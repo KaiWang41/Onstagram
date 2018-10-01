@@ -59,7 +59,8 @@ class UserProfileController: HomePostCellViewController, UIImagePickerController
                 let navController = UINavigationController(rootViewController: loginController)
                 self.present(navController, animated: true, completion: nil)
             } catch let err {
-                print("Failed to sign out:", err)
+                let message = err.localizedDescription + "\nPlease try again"
+                Helper.presentError(sender: self, message: message)
             }
         }
         alertController.addAction(logOutAction)

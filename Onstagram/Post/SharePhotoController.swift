@@ -8,7 +8,7 @@ import UIKit
 import Firebase
 import CoreLocation
 
-class SharePhotoController: UIViewController, CLLocationManagerDelegate {
+class SharePhotoController: UIViewController, CLLocationManagerDelegate, UITextViewDelegate {
     
     let locationManager = CLLocationManager()
     var location: CLLocation?
@@ -115,6 +115,9 @@ class SharePhotoController: UIViewController, CLLocationManagerDelegate {
             filtersScrollView.addSubview(filterButton)
         }
         
+        // Text view
+        textView.delegate = self
+        
         
         filtersScrollView.contentSize = CGSize(width:buttonWidth * CGFloat(itemCount+2), height: yCoord)
         
@@ -132,6 +135,15 @@ class SharePhotoController: UIViewController, CLLocationManagerDelegate {
             }
         }
         
+    }
+    
+    // Text view
+    func textView(_ textView: UITextView, shouldChangeTextIn range: NSRange, replacementText text: String) -> Bool {
+        if text == "\n" {
+            textView.resignFirstResponder()
+            return false
+        }
+        return true
     }
     
     @objc func filterButtonTapped(sender: UIButton) {
@@ -204,6 +216,9 @@ class SharePhotoController: UIViewController, CLLocationManagerDelegate {
                 if err != nil {
                     self.navigationItem.rightBarButtonItem?.isEnabled = true
                     self.textView.isUserInteractionEnabled = true
+                    
+                    let message = err!.localizedDescription + "\nPlease try again"
+                    Helper.presentError(sender: self, message: message)
                     return
                 }
                 
