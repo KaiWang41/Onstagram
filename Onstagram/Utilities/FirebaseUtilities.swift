@@ -111,6 +111,40 @@ extension Database {
         })
     }
     
+    // Fetch users that current user is following
+    func fetchFollowings(forUID uid: String, completion: @escaping ([User]) -> ()) {
+        Database.database().reference().child("following").child(uid).observeSingleEvent(of: .value, with: { (snapshot) in
+            
+            guard let dictionary = snapshot.value as? [String: Any] else {
+                completion([])
+                return
+            }
+            
+            var followings = [User]()
+            if dictionary.count == 0 {
+                completion([])
+            } else {
+                
+                dictionary.forEach({ (key, _) in
+                    
+                    Database.database().fetchUser(withUID: key, completion: { (user) in
+                        
+                        followings.append(user)
+                        if followings.count == dictionary.count {
+                            completion(followings)
+                        }
+                    })
+                })
+            }
+            
+        })
+    }
+    
+    // Fetch users liking same post as current user
+    func fetchUsersLikingSamePost(forUID uid: String, completion: @escaping ([User]) -> ()) {
+        completion([])
+    }
+    
     // Fetch users following the same user
     func fetchUsersFollowingSameUser(forUID uid: String, completion: @escaping ([User]) -> ()) {
         Database.database().reference().child("following").child(uid).observeSingleEvent(of: .value, with: { (snapshot) in

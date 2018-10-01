@@ -43,13 +43,14 @@ class UserSearchController: UICollectionViewController {
         
         searchBar.delegate = self
         
+        // All users -> users
         fetchAllUsers()
         
-        // Suggested users
+        // Suggested users -> suggestedUsers
         fetchSuggestedUsers()
     }
     
-    // Suggest users
+    // Suggest user algorithm
     private func fetchSuggestedUsers() {
         collectionView?.refreshControl?.beginRefreshing()
         
@@ -66,13 +67,29 @@ class UserSearchController: UICollectionViewController {
                 self.suggestedUsers.append(contentsOf: users)
                 
                 // 3. Liked same post
-                
+                Database.database().fetchUsersLikingSamePost(forUID: uid, completion: { (users) in
+                    
+                    self.suggestedUsers.append(contentsOf: users)
+                    
+                    // Remove from suggestiong users already following
+                    Database.database().fetchFollowings(forUID: uid, completion: { (followings) in
+                        
+                        var filteredSuggestedUsers = [User]()
+                        for suggestedUser in self.suggestedUsers {
+                            if !followings.contains(suggestedUser) {
+                                filteredSuggestedUsers.append(suggestedUser)
+                            }
+                        }
+                        self.suggestedUsers = filteredSuggestedUsers
+                        
+                        // Show in collection view
+                        self.filteredUsers = self.suggestedUsers
+                        self.searchBar.text = ""
+                        self.collectionView?.reloadData()
+                    self.collectionView?.refreshControl?.endRefreshing()
+                    })
+                })
             })
-            
-//            self.filteredUsers = followers
-//            self.searchBar.text = ""
-//            self.collectionView?.reloadData()
-//            self.collectionView?.refreshControl?.endRefreshing()
         })
     }
     

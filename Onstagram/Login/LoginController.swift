@@ -116,10 +116,10 @@ class LoginController: UIViewController {
         loginButton.backgroundColor = UIColor.rgb(red: 149, green: 204, blue: 244)
         
         Auth.auth().signIn(withEmail: email, password: password, completion: { (user, err) in
-            if let _ = err {
+            if let err = err {
                 
                 // Present error
-                Helper.presentError(sender: self, message: "Invalid email or password.\nPlease try again.")
+                Helper.presentError(sender: self, message: err.localizedDescription)
                 
                 self.resetInputFields()
                 return

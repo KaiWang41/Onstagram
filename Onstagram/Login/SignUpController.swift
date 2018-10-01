@@ -165,7 +165,7 @@ class SignUpController: UIViewController, UINavigationControllerDelegate {
             if err != nil {
                 
                 // Present error
-                Helper.presentError(sender: self, message: "Email already in use.\nPlease choose another one.")
+                Helper.presentError(sender: self, message: (err?.localizedDescription)!)
                 
                 self.resetInputFields()
                 return
