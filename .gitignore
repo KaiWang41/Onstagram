@@ -49,8 +49,8 @@ playground.xcworkspace
 Pods/
 Podfile.lock
 Podfile
-.xcworkspace
-.xcodeproj
+Onstagram.xcworkspace
+Onstagram.xcodeproj
 
 # Carthage
 #
