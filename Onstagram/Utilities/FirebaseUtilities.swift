@@ -7,6 +7,7 @@
 
 import Foundation
 import Firebase
+import CoreLocation
 
 extension Auth {
     func createUser(withEmail email: String, username: String, password: String, image: UIImage?, completion: @escaping (Error?) -> ()) {
@@ -502,6 +503,50 @@ extension Database {
         }) { (err) in
             print("Failed to fetch comments:", err)
             cancel?(err)
+        }
+    }
+    
+    // Nearby users
+    func updateLocation(forUID uid: String, latitude: Double, longitude: Double) {
+        
+        let values = ["latitude": latitude, "longitude": longitude]
+        Database.database().reference().child("locations").child(uid).updateChildValues(values)
+    }
+    
+    func removeLocation(forUID uid: String) {
+        Database.database().reference().child("locations").child(uid).removeValue()
+    }
+    
+    // Fetch all users in the Nearby View within 1000m
+    func fetchNearbyUsers(forUID uid: String, latitude: Double, longitude: Double, completion: @escaping ([User]) -> ()) {
+        
+        Database.database().reference().child("locations").observeSingleEvent(of: .value) { (snapshot) in
+            
+            var users = [User]()
+            if let dictionary = snapshot.value as? [String: Any] {
+                
+
+                dictionary.forEach({ (key, values) in
+            
+                        if let values = values as? [String: Double] {
+                            
+                            let otherLatitude = values["latitude"]
+                            let otherLongitude = values["longitude"]
+                            let location = CLLocation(latitude: latitude, longitude: longitude)
+                            if location.distance(from: CLLocation(latitude: otherLatitude!, longitude: otherLongitude!)) < 1000 {
+                                
+                                Database.database().fetchUser(withUID: key, completion: { (user) in
+                                    
+                                    if key != uid { users.append(user) }
+                                    if users.count + 1 == dictionary.count {
+                                        completion(users)
+                                    }
+                                })
+                            }
+                        }
+                    
+                })
+            }
         }
     }
     

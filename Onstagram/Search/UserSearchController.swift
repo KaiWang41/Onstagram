@@ -155,7 +155,7 @@ class UserSearchController: UICollectionViewController {
     
     // Nearby
     @objc func toNearby() {
-        let vc = NearbyViewController()
+        let vc = NearbyViewController(collectionViewLayout: UICollectionViewFlowLayout())
         navigationController?.pushViewController(vc, animated: true)
     }
 }

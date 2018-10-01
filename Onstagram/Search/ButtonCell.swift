@@ -2,9 +2,6 @@
 //  ButtonCell.swift
 //  Onstagram
 //
-//  Created by wky on 1/10/18.
-//  Copyright © 2018 Mac Gallagher. All rights reserved.
-//
 
 import UIKit
 

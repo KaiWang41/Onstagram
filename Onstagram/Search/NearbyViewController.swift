@@ -2,9 +2,6 @@
 //  NearbyViewController.swift
 //  Onstagram
 //
-//  Created by wky on 1/10/18.
-//  Copyright © 2018 Mac Gallagher. All rights reserved.
-//
 
 import UIKit
 import CoreLocation
@@ -50,8 +47,7 @@ class NearbyViewController: UICollectionViewController, CLLocationManagerDelegat
         let refreshControl = UIRefreshControl()
         refreshControl.addTarget(self, action: #selector(handleRefresh), for: .valueChanged)
         collectionView?.refreshControl = refreshControl
-
-        fetchNearbyUsers()
+        refreshControl.beginRefreshing()
     }
     
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
@@ -61,27 +57,35 @@ class NearbyViewController: UICollectionViewController, CLLocationManagerDelegat
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         
         self.location = manager.location!
-        Database.database().updateLocation
+        Database.database().updateLocation(forUID: Auth.auth().currentUser!.uid, latitude: (location?.coordinate.latitude)!, longitude: (location?.coordinate.longitude)!)
         manager.stopUpdatingLocation()
+        
+        fetchNearbyUsers()
     }
     
     private func fetchNearbyUsers() {
-        collectionView?.refreshControl?.beginRefreshing()
         
-        Database.database().fetchNearbyUsers()
+        Database.database().fetchNearbyUsers(forUID: Auth.auth().currentUser!.uid, latitude: location!.coordinate.latitude, longitude: location!.coordinate.longitude) { (users) in
+            
+            self.users = users
+            
+            self.collectionView?.reloadData()
+            self.collectionView?.refreshControl?.endRefreshing()
+        }
         
-        self.collectionView?.reloadData()
-        self.collectionView?.refreshControl?.endRefreshing()
     }
     
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         navigationController?.view.setNeedsLayout()
         navigationController?.view.layoutIfNeeded()
+        
+        Database.database().removeLocation(forUID: Auth.auth().currentUser!.uid)
     }
     
     
     @objc private func handleRefresh() {
+        collectionView?.refreshControl?.beginRefreshing()
         fetchNearbyUsers()
     }
     
