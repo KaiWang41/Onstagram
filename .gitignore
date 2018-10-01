@@ -47,10 +47,6 @@ playground.xcworkspace
 # https://guides.cocoapods.org/using/using-cocoapods.html#should-i-check-the-pods-directory-into-source-control
 #
 Pods/
-Podfile.lock
-Podfile
-Onstagram.xcworkspace
-Onstagram.xcodeproj
 
 # Carthage
 #
@@ -74,4 +70,3 @@ fastlane/test_output
 # Others
 Images/
 ~$评分表.xlsx
-GoogleService-Info.plist
