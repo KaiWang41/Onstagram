@@ -36,6 +36,8 @@ class UserSearchController: UICollectionViewController {
         collectionView?.alwaysBounceVertical = true
         collectionView?.keyboardDismissMode = .onDrag
         collectionView?.register(UserSearchCell.self, forCellWithReuseIdentifier: UserSearchCell.cellId)
+        // Nearby
+        collectionView?.register(ButtonCell.self, forCellWithReuseIdentifier: ButtonCell.cellId)
         
         let refreshControl = UIRefreshControl()
         refreshControl.addTarget(self, action: #selector(handleRefresh), for: .valueChanged)
@@ -49,6 +51,12 @@ class UserSearchController: UICollectionViewController {
         // Suggested users -> suggestedUsers
         fetchSuggestedUsers()
     }
+    
+    // User cells and button cell
+    override func numberOfSections(in collectionView: UICollectionView) -> Int {
+        return 2
+    }
+    
     
     // Suggest user algorithm
     private func fetchSuggestedUsers() {
@@ -114,19 +122,41 @@ class UserSearchController: UICollectionViewController {
     
     override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         searchBar.resignFirstResponder()
-        let userProfileController = UserProfileController(collectionViewLayout: UICollectionViewFlowLayout())
-        userProfileController.user = filteredUsers[indexPath.item]
-        navigationController?.pushViewController(userProfileController, animated: true)
+        
+        // Nearby
+        if indexPath.section == 0 {
+            let userProfileController = UserProfileController(collectionViewLayout: UICollectionViewFlowLayout())
+            userProfileController.user = filteredUsers[indexPath.item]
+            navigationController?.pushViewController(userProfileController, animated: true)
+        } else {
+           
+//           let nearbyViewController = NearbyViewController()
+//            navigationController?.pushViewController(nearbyViewController, animated: true)
+        }
     }
     
     override func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return filteredUsers.count
+        return (section == 0) ? filteredUsers.count : 1
     }
     
     override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: UserSearchCell.cellId, for: indexPath) as! UserSearchCell
-        cell.user = filteredUsers[indexPath.item]
-        return cell
+        
+        // Nearby
+        if indexPath.section == 0 {
+            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: UserSearchCell.cellId, for: indexPath) as! UserSearchCell
+            cell.user = filteredUsers[indexPath.item]
+            return cell
+        } else {
+            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: ButtonCell.cellId, for: indexPath) as! ButtonCell
+            return cell
+        }
+        
+    }
+    
+    // Nearby
+    @objc func toNearby() {
+        let vc = NearbyViewController()
+        navigationController?.pushViewController(vc, animated: true)
     }
 }
 

@@ -37,9 +37,11 @@ class HomeController: HomePostCellViewController, CLLocationManagerDelegate, UII
             if !CLLocationManager.locationServicesEnabled() {
                 locationManager.requestWhenInUseAuthorization()
             }
-            locationManager.delegate = self
-            locationManager.desiredAccuracy = kCLLocationAccuracyNearestTenMeters
-            locationManager.startUpdatingLocation()
+            if CLLocationManager.locationServicesEnabled() {
+                locationManager.delegate = self
+                locationManager.desiredAccuracy = kCLLocationAccuracyNearestTenMeters
+                locationManager.startUpdatingLocation()
+            }
         }
         
         
