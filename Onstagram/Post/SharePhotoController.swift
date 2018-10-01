@@ -12,6 +12,7 @@ class SharePhotoController: UIViewController, CLLocationManagerDelegate, UITextV
     
     let locationManager = CLLocationManager()
     var location: CLLocation?
+    let ciContext = CIContext(options: nil)
     
     var selectedImage: UIImage? {
         didSet {
@@ -35,6 +36,12 @@ class SharePhotoController: UIViewController, CLLocationManagerDelegate, UITextV
         tv.autocorrectionType = .no
         return tv
     }()
+    
+    let contrastSlider = UISlider()
+    let brightnessSlider = UISlider()
+    private let contrastValueLabel = UILabel()
+    private let brightnessValueLabel = UILabel()
+    
     
     override var prefersStatusBarHidden: Bool { return true }
     
@@ -79,8 +86,18 @@ class SharePhotoController: UIViewController, CLLocationManagerDelegate, UITextV
         super.viewDidLoad()
         view.backgroundColor = UIColor.rgb(red: 240, green: 240, blue: 240)
         navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Share", style: .plain, target: self, action: #selector(handleShare))
+        imageToFilter.image = imageView.image
         
-        
+        brightnessSlider.tag = 0
+        contrastSlider.tag = 1
+        let contrastValue = Int(contrastSlider.value / 200) * 1000
+        contrastValueLabel.text = ("\(contrastValue)")
+        let brightnessValue = Int(brightnessSlider.value / 200) * 1000
+        brightnessValueLabel.text = ("\(brightnessValue)")
+        brightnessSlider.isContinuous = true
+        contrastSlider.isContinuous = true
+        brightnessSlider.addTarget(self, action: #selector(sliderValueDidChange(_:)), for: .valueChanged)
+        contrastSlider.addTarget(self, action: #selector(sliderValueDidChange(_:)), for: .valueChanged)
         
         // Filter
         var xCoord: CGFloat = 5
@@ -102,7 +119,6 @@ class SharePhotoController: UIViewController, CLLocationManagerDelegate, UITextV
             filterButton.addTarget(self, action:#selector(filterButtonTapped), for: .touchUpInside)
             filterButton.layer.cornerRadius = 6
             filterButton.clipsToBounds = true
-            let ciContext = CIContext(options: nil)
             let coreImage = CIImage(image: imageView.image!)
             let filter = CIFilter(name: "\(CIFilterNames[i])" )
             filter!.setDefaults()
@@ -146,6 +162,28 @@ class SharePhotoController: UIViewController, CLLocationManagerDelegate, UITextV
         return true
     }
     
+    @objc func sliderValueDidChange(_ sender:UISlider!){
+        if sender.tag == 0{
+            let displayinPercentage: Int = Int((sender.value/200) * 10000)
+            brightnessValueLabel.text = ("\(displayinPercentage)")
+            let beginImage = CIImage(image: imageToFilter.image!)
+            let filter = CIFilter(name: "CIColorControls")
+            filter?.setValue(beginImage, forKey: kCIInputImageKey)
+            filter!.setValue(sender.value, forKey: kCIInputBrightnessKey)
+            let filteredImage = filter?.outputImage
+            imageToFilter.image = UIImage(cgImage: ciContext.createCGImage(filteredImage!, from: (filteredImage?.extent)!)!)
+        }else if sender.tag == 1{
+            let displayinPercentage: Int = Int((sender.value/200) * 10000)
+            contrastValueLabel.text = ("\(displayinPercentage)")
+            let beginImage = CIImage(image: imageToFilter.image!)
+            let filter = CIFilter(name: "CIColorControls")
+            filter?.setValue(beginImage, forKey: kCIInputImageKey)
+            filter!.setValue(sender.value, forKey: kCIInputContrastKey)
+            let filteredImage = filter?.outputImage
+            imageToFilter.image = UIImage(cgImage: ciContext.createCGImage(filteredImage!, from: (filteredImage?.extent)!)!)
+        }
+    }
+    
     @objc func filterButtonTapped(sender: UIButton) {
         let button = sender as UIButton
         
@@ -168,7 +206,6 @@ class SharePhotoController: UIViewController, CLLocationManagerDelegate, UITextV
     // Filter
     private func layoutViews() {
         let containerView  = UIView()
-        let choiceView = UIView()
         view.addSubview(containerView)
         containerView.anchor(top: view.safeAreaLayoutGuide.topAnchor, left: view.safeAreaLayoutGuide.leftAnchor, right: view.safeAreaLayoutGuide.rightAnchor, height: UIScreen.main.bounds.width )
         
@@ -179,18 +216,24 @@ class SharePhotoController: UIViewController, CLLocationManagerDelegate, UITextV
         imageToFilter.anchor(top: containerView.topAnchor, left: containerView.leftAnchor, bottom: containerView.bottomAnchor, right: containerView.rightAnchor, height:UIScreen.main.bounds.width )
         
         view.addSubview(textView)
-        textView.anchor(top: containerView.bottomAnchor, left: view.safeAreaLayoutGuide.leftAnchor, right: view.safeAreaLayoutGuide.rightAnchor, paddingTop: 30, height:0.2 * UIScreen.main.bounds.width)
+        textView.anchor(top: containerView.bottomAnchor, left: view.safeAreaLayoutGuide.leftAnchor, right: view.safeAreaLayoutGuide.rightAnchor, paddingTop: 10, height:100)
+        
         view.addSubview(filtersScrollView)
-        filtersScrollView.anchor(top: textView.bottomAnchor, left: view.safeAreaLayoutGuide.leftAnchor, right: view.safeAreaLayoutGuide.rightAnchor, paddingTop: 50, height: 0.3 * UIScreen.main.bounds.width)
+        filtersScrollView.anchor(top: textView.bottomAnchor, left: view.safeAreaLayoutGuide.leftAnchor, right: view.safeAreaLayoutGuide.rightAnchor, paddingTop: 20, height:70 )
         
-        view.addSubview(choiceView)
-        choiceView.anchor(left: view.safeAreaLayoutGuide.leftAnchor, bottom: view.safeAreaLayoutGuide.bottomAnchor, right: view.safeAreaLayoutGuide.rightAnchor, height: 50 )
         
-        choiceView.addSubview(filterChoice)
-        filterChoice.anchor(top: choiceView.topAnchor, left: choiceView.leftAnchor, bottom: choiceView.bottomAnchor, width: 0.5 * UIScreen.main.bounds.width, height: 50)
+        view.addSubview(brightnessValueLabel)
+        brightnessValueLabel.anchor(top: filtersScrollView.bottomAnchor, left: view.safeAreaLayoutGuide.leftAnchor, right: view.safeAreaLayoutGuide.rightAnchor, paddingTop: 20, paddingLeft: 20, paddingRight:20, height:20)
         
-        choiceView.addSubview(editChoice)
-        editChoice.anchor(top: choiceView.bottomAnchor, left: filterChoice.leftAnchor, bottom: choiceView.bottomAnchor, right: choiceView.rightAnchor, width: 0.5 * UIScreen.main.bounds.width, height: 50)
+        view.addSubview(brightnessSlider)
+        brightnessSlider.anchor(top: brightnessValueLabel.bottomAnchor, left: view.safeAreaLayoutGuide.leftAnchor, right: view.safeAreaLayoutGuide.rightAnchor, paddingTop: 10, paddingLeft: 20, paddingRight:20,height: 10)
+        
+        view.addSubview(contrastValueLabel)
+        contrastValueLabel.anchor(top: brightnessSlider.bottomAnchor, left: view.safeAreaLayoutGuide.leftAnchor, right: view.safeAreaLayoutGuide.rightAnchor, paddingTop: 10, paddingLeft: 20, paddingRight:20,height:20)
+        
+        view.addSubview(contrastSlider)
+        contrastSlider.anchor(top: contrastValueLabel.bottomAnchor, left: view.safeAreaLayoutGuide.leftAnchor, right: view.safeAreaLayoutGuide.rightAnchor, paddingTop: 10, paddingLeft: 20, paddingRight:20,height:10)
+        
     }
     
     @objc private func handleShare() {
