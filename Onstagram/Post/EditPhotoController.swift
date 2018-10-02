@@ -37,26 +37,6 @@ class EditPhotoController: UIViewController {
     let imageToEdit = UIImageView()
     let containerView  = UIView()
     
-    private let filterChoice : UIButton = {
-        let ub = UIButton()
-        ub.setTitle("Filter", for: .normal)
-        ub.titleLabel?.font = UIFont(name:"Times New Roman", size: 20)
-        ub.setTitleColor(.black, for: .normal)
-        ub.frame = CGRect(x: 0, y: 0, width: 50, height: 50)
-        
-        return ub
-    }()
-    
-    private let editChoice : UIButton = {
-        let ub = UIButton()
-        ub.setTitle("Edit", for: .normal)
-        ub.titleLabel?.font = UIFont(name:"Times New Roman", size: 20)
-        ub.setTitleColor(.black, for: .normal)
-        ub.frame = CGRect(x: 0, y: 0, width: 0.5 * UIScreen.main.bounds.width, height: 0.2 * UIScreen.main.bounds.height)
-        
-        return ub
-    }()
-    
     
     
     var CIFilterNames = [
@@ -197,7 +177,7 @@ class EditPhotoController: UIViewController {
         
         let remainingHeight =  UIScreen.main.bounds.height - UIScreen.main.bounds.width
         view.addSubview(filtersScrollView)
-        filtersScrollView.anchor(top: imageToEdit.bottomAnchor, left: view.safeAreaLayoutGuide.leftAnchor, right: view.safeAreaLayoutGuide.rightAnchor, paddingTop: 20, height: 0.2 * remainingHeight )
+        filtersScrollView.anchor(top: imageToEdit.bottomAnchor, left: view.safeAreaLayoutGuide.leftAnchor, right: view.safeAreaLayoutGuide.rightAnchor, paddingTop: 20, height: 70 )
         
         
         view.addSubview(brightnessValueLabel)
@@ -215,7 +195,7 @@ class EditPhotoController: UIViewController {
     }
     
     @objc private func handleNext() {
-        guard let editedImage = imageToFilter.image else { return }
+        guard let editedImage = imageToEdit.image else { return }
         navigationItem.rightBarButtonItem?.isEnabled = false
         
         let sharePhotoController = SharePhotoController()
