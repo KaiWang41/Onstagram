@@ -13,8 +13,8 @@ class NearbyViewController: UICollectionViewController, CLLocationManagerDelegat
     let locationManager = CLLocationManager()
     var location: CLLocation?
     
-    private func dismissDueToLocation() {
-        Helper.presentError(sender: self, message: "You have denied permission of use of your current location.")
+    private func locationDenied() {
+        Helper.presentError(sender: self, message: "You have denied permission of location services.")
         dismiss(animated: true, completion: nil)
     }
     
@@ -23,7 +23,7 @@ class NearbyViewController: UICollectionViewController, CLLocationManagerDelegat
         
         // Location
         if CLLocationManager.authorizationStatus() == .denied {
-            self.dismissDueToLocation()
+            self.locationDenied()
         } else {
             if !CLLocationManager.locationServicesEnabled() {
                 locationManager.requestWhenInUseAuthorization()
@@ -33,7 +33,7 @@ class NearbyViewController: UICollectionViewController, CLLocationManagerDelegat
                 locationManager.desiredAccuracy = kCLLocationAccuracyNearestTenMeters
                 locationManager.startUpdatingLocation()
             } else {
-                self.dismissDueToLocation()
+                self.locationDenied()
             }
         }
         

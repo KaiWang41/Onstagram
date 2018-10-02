@@ -31,21 +31,6 @@ class HomeController: HomePostCellViewController, CLLocationManagerDelegate, UII
         collectionView?.refreshControl = refreshControl
         
         fetchAllPosts(sort: "time")
-        
-        // Location
-        if CLLocationManager.authorizationStatus() != .denied {
-            if !CLLocationManager.locationServicesEnabled() {
-                locationManager.requestWhenInUseAuthorization()
-            }
-            if CLLocationManager.locationServicesEnabled() {
-                locationManager.delegate = self
-                locationManager.desiredAccuracy = kCLLocationAccuracyNearestTenMeters
-                locationManager.startUpdatingLocation()
-            }
-        }
-        
-        
-        
     }
     
     // Location
@@ -70,6 +55,25 @@ class HomeController: HomePostCellViewController, CLLocationManagerDelegate, UII
     
     private func fetchAllPosts(sort: String) {
         showEmptyStateViewIfNeeded()
+        if sort == "location" {
+            // Location
+            if CLLocationManager.authorizationStatus() != .denied {
+                if !CLLocationManager.locationServicesEnabled() {
+                    locationManager.requestWhenInUseAuthorization()
+                }
+                if CLLocationManager.locationServicesEnabled() {
+                    locationManager.delegate = self
+                    locationManager.desiredAccuracy = kCLLocationAccuracyNearestTenMeters
+                    locationManager.startUpdatingLocation()
+                } else {
+                    Helper.presentError(sender: self, message: "You have denied permission of location services.")
+                    return
+                }
+            } else {
+                Helper.presentError(sender: self, message: "You have denied permission of location services.")
+                return
+            }
+        }
         fetchPostsForCurrentUser(sort: sort)
         fetchFollowingUserPosts(sort: sort)
     }
