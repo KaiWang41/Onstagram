@@ -14,9 +14,25 @@ class HomeController: HomePostCellViewController, CLLocationManagerDelegate, UII
     // Loation
     let locationManager = CLLocationManager()
     var location: CLLocation?
+    enum SortType {
+        case time
+        case location
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        // Location
+        if CLLocationManager.authorizationStatus() != .denied {
+            if !CLLocationManager.locationServicesEnabled() {
+                self.locationManager.requestWhenInUseAuthorization()
+            }
+            if CLLocationManager.locationServicesEnabled() {
+                self.locationManager.delegate = self
+                self.locationManager.desiredAccuracy = kCLLocationAccuracyNearestTenMeters
+            }
+        }
+        
         configureNavigationBar()
         
         collectionView?.backgroundColor = .white
@@ -30,7 +46,7 @@ class HomeController: HomePostCellViewController, CLLocationManagerDelegate, UII
         refreshControl.addTarget(self, action: #selector(handleRefresh), for: .valueChanged)
         collectionView?.refreshControl = refreshControl
         
-        fetchAllPosts(sort: "time")
+        fetchAllPosts(sortBy: .time)
     }
     
     // Location
@@ -38,11 +54,14 @@ class HomeController: HomePostCellViewController, CLLocationManagerDelegate, UII
         
         location = manager.location
         manager.stopUpdatingLocation()
+        
+        posts.removeAll()
+        fetchAllPosts(sortBy: .location)
     }
     
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
-        
-        print("location error: ", error)
+        Helper.presentError(sender: self, message: "Failed to retrieve location. Please try again.")
+        self.collectionView?.refreshControl?.endRefreshing()
     }
     
     private func configureNavigationBar() {
@@ -53,32 +72,13 @@ class HomeController: HomePostCellViewController, CLLocationManagerDelegate, UII
         navigationItem.backBarButtonItem?.tintColor = .black
     }
     
-    private func fetchAllPosts(sort: String) {
+    private func fetchAllPosts(sortBy sortType: SortType) {
         showEmptyStateViewIfNeeded()
-        if sort == "location" {
-            // Location
-            if CLLocationManager.authorizationStatus() != .denied {
-                if !CLLocationManager.locationServicesEnabled() {
-                    locationManager.requestWhenInUseAuthorization()
-                }
-                if CLLocationManager.locationServicesEnabled() {
-                    locationManager.delegate = self
-                    locationManager.desiredAccuracy = kCLLocationAccuracyNearestTenMeters
-                    locationManager.startUpdatingLocation()
-                } else {
-                    Helper.presentError(sender: self, message: "You have denied permission of location services.")
-                    return
-                }
-            } else {
-                Helper.presentError(sender: self, message: "You have denied permission of location services.")
-                return
-            }
-        }
-        fetchPostsForCurrentUser(sort: sort)
-        fetchFollowingUserPosts(sort: sort)
+        fetchPostsForCurrentUser(sortBy: sortType)
+        fetchFollowingUserPosts(sortBy: sortType)
     }
     
-    private func fetchPostsForCurrentUser(sort: String) {
+    private func fetchPostsForCurrentUser(sortBy sortType: SortType) {
         guard let currentLoggedInUserId = Auth.auth().currentUser?.uid else { return }
         
         collectionView?.refreshControl?.beginRefreshing()
@@ -86,7 +86,7 @@ class HomeController: HomePostCellViewController, CLLocationManagerDelegate, UII
         Database.database().fetchPostsForUser(withUID: currentLoggedInUserId, completion: { (posts) in
             self.posts.append(contentsOf: posts)
             
-            if sort == "time" {
+            if sortType == .time {
                 self.posts.sort(by: { (p1, p2) -> Bool in
                     return p1.creationDate.compare(p2.creationDate) == .orderedDescending
                 })
@@ -103,7 +103,7 @@ class HomeController: HomePostCellViewController, CLLocationManagerDelegate, UII
         }
     }
     
-    private func fetchFollowingUserPosts(sort: String) {
+    private func fetchFollowingUserPosts(sortBy sortType: SortType) {
         guard let currentLoggedInUserId = Auth.auth().currentUser?.uid else { return }
         
         collectionView?.refreshControl?.beginRefreshing()
@@ -117,7 +117,7 @@ class HomeController: HomePostCellViewController, CLLocationManagerDelegate, UII
                     
                     self.posts.append(contentsOf: posts)
                     
-                    if sort == "time" {
+                    if sortType == .time {
                         self.posts.sort(by: { (p1, p2) -> Bool in
                             return p1.creationDate.compare(p2.creationDate) == .orderedDescending
                         })
@@ -141,11 +141,13 @@ class HomeController: HomePostCellViewController, CLLocationManagerDelegate, UII
     
     // Calculate post location distance to current location.
     func getDistance(post: Post) -> Double {
+        if post.location == "" { return Double.infinity }
+        
         if let location = location {
             return location.distance(from: CLLocation(latitude: post.latitude, longitude: post.longitude))
-        } else {
-            return Double.infinity
         }
+        
+        return Double.infinity
     }
     
     override func showEmptyStateViewIfNeeded() {
@@ -167,7 +169,7 @@ class HomeController: HomePostCellViewController, CLLocationManagerDelegate, UII
     
     @objc private func handleRefresh() {
         posts.removeAll()
-        fetchAllPosts(sort: "time")
+        fetchAllPosts(sortBy: .time)
     }
     
     // Take photo
@@ -226,12 +228,15 @@ class HomeController: HomePostCellViewController, CLLocationManagerDelegate, UII
             self.handleRefresh()
         }))
         ac.addAction(UIAlertAction(title: "Location", style: .default, handler: { _ in
-            
-            self.posts.removeAll()
-            self.fetchAllPosts(sort: "location")
+            self.collectionView?.refreshControl?.beginRefreshing()
+            self.locationManager.startUpdatingLocation()
         }))
         ac.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
         present(ac, animated: true)
+    }
+    
+    private func locationDenied() {
+        Helper.presentError(sender: self, message: "You have denied permission of location services.")
     }
     
     override func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
