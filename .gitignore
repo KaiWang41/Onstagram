@@ -70,4 +70,7 @@ fastlane/test_output
 # Others
 Images/
 ~$评分表.xlsx
-*.xcodeproj/
+
+### Xcode Patch ###
+*.xcodeproj/*
+!*.xcodeproj/project.pbxproj

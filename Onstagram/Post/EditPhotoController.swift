@@ -2,9 +2,6 @@
 //  EditPhotoController.swift
 //  Onstagram
 //
-//  Created by wky on 2/10/18.
-//  Copyright © 2018 Mac Gallagher. All rights reserved.
-//
 
 import UIKit
 
