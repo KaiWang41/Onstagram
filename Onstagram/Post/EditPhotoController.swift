@@ -57,6 +57,7 @@ class EditPhotoController: UIViewController {
         view.backgroundColor = UIColor.rgb(red: 240, green: 240, blue: 240)
         navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Next", style: .plain, target: self, action: #selector(handleNext))
         imageToFilter.image = imageView.image
+        imageToEdit.image = imageToFilter.image
         
         brightnessSlider.tag = 0
         contrastSlider.tag = 1
@@ -138,8 +139,8 @@ class EditPhotoController: UIViewController {
                 beginImage = CIImage(image: imageToFilter.image!)!
             }
             let filter = CIFilter(name: "CIColorControls")
+            print (beginImage)
             filter?.setValue(beginImage, forKey: kCIInputImageKey)
-            print ("contrast", sender.value)
             filter!.setValue((sender.value), forKey: kCIInputContrastKey)
             let filteredImage = filter?.outputImage
             imageToEdit.image = UIImage(cgImage: ciContext.createCGImage(filteredImage!, from: (filteredImage?.extent)!)!)
