@@ -34,7 +34,6 @@ class EditPhotoController: UIViewController {
     // Filter
     let filtersScrollView = UIScrollView()
     let imageToFilter = UIImageView()
-    let imageToEdit = UIImageView()
     let containerView  = UIView()
     
     
@@ -57,7 +56,6 @@ class EditPhotoController: UIViewController {
         view.backgroundColor = UIColor.rgb(red: 240, green: 240, blue: 240)
         navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Next", style: .plain, target: self, action: #selector(handleNext))
         imageToFilter.image = imageView.image
-        imageToEdit.image = imageToFilter.image
         
         brightnessSlider.tag = 0
         contrastSlider.tag = 1
@@ -117,34 +115,23 @@ class EditPhotoController: UIViewController {
         if sender.tag == 0{
             let displayinPercentage: Int = Int(sender.value * 20)
             brightnessValueLabel.text = ("Brightness: \(displayinPercentage)")
-            var beginImage = CIImage()
-            if contrastSlider.value != 0{
-                beginImage = CIImage(image: imageToEdit.image!)!
-            }else{
-                beginImage = CIImage(image: imageToFilter.image!)!
-            }
+            let beginImage = CIImage(image: imageToFilter.image!)
             let filter = CIFilter(name: "CIColorControls")
             filter?.setValue(beginImage, forKey: kCIInputImageKey)
             filter!.setValue(sender.value/20, forKey: kCIInputBrightnessKey)
             let filteredImage = filter?.outputImage
-            imageToEdit.image = UIImage(cgImage: ciContext.createCGImage(filteredImage!, from: (filteredImage?.extent)!)!)
-            containerView.bringSubview(toFront: imageToEdit)
+            imageToFilter.image = UIImage(cgImage: ciContext.createCGImage(filteredImage!, from: (filteredImage?.extent)!)!)
         }else if sender.tag == 1{
+            if sender.value != 0{
             let displayinPercentage: Int = Int(sender.value * 20)
             contrastValueLabel.text = ("Contrast: \(displayinPercentage)")
-            var beginImage = CIImage()
-            if brightnessSlider.value != 0{
-                beginImage = CIImage(image: imageToEdit.image!)!
-            }else{
-                beginImage = CIImage(image: imageToFilter.image!)!
-            }
+            let beginImage = CIImage(image: imageToFilter.image!)
             let filter = CIFilter(name: "CIColorControls")
-            print (beginImage)
             filter?.setValue(beginImage, forKey: kCIInputImageKey)
             filter!.setValue((sender.value), forKey: kCIInputContrastKey)
             let filteredImage = filter?.outputImage
-            imageToEdit.image = UIImage(cgImage: ciContext.createCGImage(filteredImage!, from: (filteredImage?.extent)!)!)
-            containerView.bringSubview(toFront: imageToEdit)
+            imageToFilter.image = UIImage(cgImage: ciContext.createCGImage(filteredImage!, from: (filteredImage?.extent)!)!)
+            }
         }
     }
     
@@ -158,7 +145,7 @@ class EditPhotoController: UIViewController {
         contrastValueLabel.text = ("Contrast: \(contrastValue)")
         let brightnessValue = Int(brightnessSlider.value )
         brightnessValueLabel.text = ("Brightness: \(brightnessValue)")
-        containerView.bringSubview(toFront: imageToFilter)
+//        containerView.bringSubview(toFront: imageToFilter)
     }
     
     // Filter
@@ -172,13 +159,10 @@ class EditPhotoController: UIViewController {
         containerView.addSubview(imageToFilter)
         imageToFilter.anchor(top: containerView.topAnchor, left: containerView.leftAnchor, bottom: containerView.bottomAnchor, right: containerView.rightAnchor, height:UIScreen.main.bounds.width )
         
-        containerView.addSubview(imageToEdit)
-        imageToEdit.anchor(top: containerView.topAnchor, left: containerView.leftAnchor, bottom: containerView.bottomAnchor, right: containerView.rightAnchor, height:UIScreen.main.bounds.width )
-        
         
         let remainingHeight =  UIScreen.main.bounds.height - UIScreen.main.bounds.width
         view.addSubview(filtersScrollView)
-        filtersScrollView.anchor(top: imageToEdit.bottomAnchor, left: view.safeAreaLayoutGuide.leftAnchor, right: view.safeAreaLayoutGuide.rightAnchor, paddingTop: 20, height: 70 )
+        filtersScrollView.anchor(top: imageToFilter.bottomAnchor, left: view.safeAreaLayoutGuide.leftAnchor, right: view.safeAreaLayoutGuide.rightAnchor, paddingTop: 20, height: 70 )
         
         
         view.addSubview(brightnessValueLabel)
@@ -196,7 +180,7 @@ class EditPhotoController: UIViewController {
     }
     
     @objc private func handleNext() {
-        guard let editedImage = imageToEdit.image else { return }
+        guard let editedImage = imageToFilter.image else { return }
         navigationItem.rightBarButtonItem?.isEnabled = false
         
         let sharePhotoController = SharePhotoController()
