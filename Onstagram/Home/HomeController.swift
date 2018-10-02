@@ -144,7 +144,7 @@ class HomeController: HomePostCellViewController, CLLocationManagerDelegate, UII
         if let location = location {
             return location.distance(from: CLLocation(latitude: post.latitude, longitude: post.longitude))
         } else {
-            return 0
+            return Double.infinity
         }
     }
     
