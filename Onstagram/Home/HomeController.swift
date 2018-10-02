@@ -63,7 +63,6 @@ class HomeController: HomePostCellViewController, CLLocationManagerDelegate, UII
     
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
         Helper.presentError(sender: self, message: "Failed to retrieve location. Please try again.")
-        self.collectionView?.refreshControl?.endRefreshing()
     }
     
     private func configureNavigationBar() {
@@ -226,11 +225,10 @@ class HomeController: HomePostCellViewController, CLLocationManagerDelegate, UII
     @objc private func handleSort() {
         let ac = UIAlertController(title: nil, message: "Sort By", preferredStyle: .actionSheet)
         ac.addAction(UIAlertAction(title: "Date / Time", style: .default, handler: { _ in
-            
+            self.sortType = .time
             self.handleRefresh()
         }))
         ac.addAction(UIAlertAction(title: "Location", style: .default, handler: { _ in
-            self.collectionView?.refreshControl?.beginRefreshing()
             self.locationManager.startUpdatingLocation()
         }))
         ac.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
