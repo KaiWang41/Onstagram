@@ -34,6 +34,8 @@ class EditPhotoController: UIViewController {
     // Filter
     let filtersScrollView = UIScrollView()
     let imageToFilter = UIImageView()
+    let imageToEdit = UIImageView()
+    let containerView  = UIView()
     
     private let filterChoice : UIButton = {
         let ub = UIButton()
@@ -78,10 +80,16 @@ class EditPhotoController: UIViewController {
         
         brightnessSlider.tag = 0
         contrastSlider.tag = 1
-        let contrastValue = Int(contrastSlider.value / 200) * 1000
-        contrastValueLabel.text = ("\(contrastValue)")
-        let brightnessValue = Int(brightnessSlider.value / 200) * 1000
-        brightnessValueLabel.text = ("\(brightnessValue)")
+        brightnessSlider.maximumValue = 5
+        brightnessSlider.minimumValue = -5
+        brightnessSlider.value = 0
+        contrastSlider.maximumValue = 5
+        contrastSlider.minimumValue = -5
+        contrastSlider.value = 0
+        let contrastValue = Int((contrastSlider.value))
+        contrastValueLabel.text = ("Contrast: \(contrastValue)")
+        let brightnessValue = Int(brightnessSlider.value )
+        brightnessValueLabel.text = ("Brightness: \(brightnessValue)")
         brightnessSlider.isContinuous = true
         contrastSlider.isContinuous = true
         brightnessSlider.addTarget(self, action: #selector(sliderValueDidChange(_:)), for: .valueChanged)
@@ -126,23 +134,36 @@ class EditPhotoController: UIViewController {
     
     @objc func sliderValueDidChange(_ sender:UISlider!){
         if sender.tag == 0{
-            let displayinPercentage: Int = Int((sender.value/200) * 10000)
-            brightnessValueLabel.text = ("\(displayinPercentage)")
-            let beginImage = CIImage(image: imageToFilter.image!)
+            let displayinPercentage: Int = Int(sender.value * 20)
+            brightnessValueLabel.text = ("Brightness: \(displayinPercentage)")
+            var beginImage = CIImage()
+            if contrastSlider.value != 0{
+                beginImage = CIImage(image: imageToEdit.image!)!
+            }else{
+                beginImage = CIImage(image: imageToFilter.image!)!
+            }
             let filter = CIFilter(name: "CIColorControls")
             filter?.setValue(beginImage, forKey: kCIInputImageKey)
-            filter!.setValue(sender.value, forKey: kCIInputBrightnessKey)
+            filter!.setValue(sender.value/20, forKey: kCIInputBrightnessKey)
             let filteredImage = filter?.outputImage
-            imageToFilter.image = UIImage(cgImage: ciContext.createCGImage(filteredImage!, from: (filteredImage?.extent)!)!)
+            imageToEdit.image = UIImage(cgImage: ciContext.createCGImage(filteredImage!, from: (filteredImage?.extent)!)!)
+            containerView.bringSubview(toFront: imageToEdit)
         }else if sender.tag == 1{
-            let displayinPercentage: Int = Int((sender.value/200) * 10000)
-            contrastValueLabel.text = ("\(displayinPercentage)")
-            let beginImage = CIImage(image: imageToFilter.image!)
+            let displayinPercentage: Int = Int(sender.value * 20)
+            contrastValueLabel.text = ("Contrast: \(displayinPercentage)")
+            var beginImage = CIImage()
+            if brightnessSlider.value != 0{
+                beginImage = CIImage(image: imageToEdit.image!)!
+            }else{
+                beginImage = CIImage(image: imageToFilter.image!)!
+            }
             let filter = CIFilter(name: "CIColorControls")
             filter?.setValue(beginImage, forKey: kCIInputImageKey)
-            filter!.setValue(sender.value, forKey: kCIInputContrastKey)
+            print ("contrast", sender.value)
+            filter!.setValue((sender.value), forKey: kCIInputContrastKey)
             let filteredImage = filter?.outputImage
-            imageToFilter.image = UIImage(cgImage: ciContext.createCGImage(filteredImage!, from: (filteredImage?.extent)!)!)
+            imageToEdit.image = UIImage(cgImage: ciContext.createCGImage(filteredImage!, from: (filteredImage?.extent)!)!)
+            containerView.bringSubview(toFront: imageToEdit)
         }
     }
     
@@ -150,11 +171,17 @@ class EditPhotoController: UIViewController {
         let button = sender as UIButton
         
         imageToFilter.image = button.backgroundImage(for: UIControlState.normal)
+        brightnessSlider.value = 0
+        contrastSlider.value = 0
+        let contrastValue = Int((contrastSlider.value))
+        contrastValueLabel.text = ("Contrast: \(contrastValue)")
+        let brightnessValue = Int(brightnessSlider.value )
+        brightnessValueLabel.text = ("Brightness: \(brightnessValue)")
+        containerView.bringSubview(toFront: imageToFilter)
     }
     
     // Filter
     private func layoutViews() {
-        let containerView  = UIView()
         view.addSubview(containerView)
         containerView.anchor(top: view.safeAreaLayoutGuide.topAnchor, left: view.safeAreaLayoutGuide.leftAnchor, right: view.safeAreaLayoutGuide.rightAnchor, height: UIScreen.main.bounds.width )
         
@@ -164,21 +191,26 @@ class EditPhotoController: UIViewController {
         containerView.addSubview(imageToFilter)
         imageToFilter.anchor(top: containerView.topAnchor, left: containerView.leftAnchor, bottom: containerView.bottomAnchor, right: containerView.rightAnchor, height:UIScreen.main.bounds.width )
         
+        containerView.addSubview(imageToEdit)
+        imageToEdit.anchor(top: containerView.topAnchor, left: containerView.leftAnchor, bottom: containerView.bottomAnchor, right: containerView.rightAnchor, height:UIScreen.main.bounds.width )
+        
+        
+        let remainingHeight =  UIScreen.main.bounds.height - UIScreen.main.bounds.width
         view.addSubview(filtersScrollView)
-        filtersScrollView.anchor(top: imageToFilter.bottomAnchor, left: view.safeAreaLayoutGuide.leftAnchor, right: view.safeAreaLayoutGuide.rightAnchor, paddingTop: 20, height:70 )
+        filtersScrollView.anchor(top: imageToEdit.bottomAnchor, left: view.safeAreaLayoutGuide.leftAnchor, right: view.safeAreaLayoutGuide.rightAnchor, paddingTop: 20, height: 0.2 * remainingHeight )
         
         
         view.addSubview(brightnessValueLabel)
-        brightnessValueLabel.anchor(top: filtersScrollView.bottomAnchor, left: view.safeAreaLayoutGuide.leftAnchor, right: view.safeAreaLayoutGuide.rightAnchor, paddingTop: 20, paddingLeft: 20, paddingRight:20, height:20)
+        brightnessValueLabel.anchor(top: filtersScrollView.bottomAnchor, left: view.safeAreaLayoutGuide.leftAnchor, right: view.safeAreaLayoutGuide.rightAnchor, paddingTop: 20, paddingLeft: 30, paddingRight:30, height: 0.05 * remainingHeight)
         
         view.addSubview(brightnessSlider)
-        brightnessSlider.anchor(top: brightnessValueLabel.bottomAnchor, left: view.safeAreaLayoutGuide.leftAnchor, right: view.safeAreaLayoutGuide.rightAnchor, paddingTop: 10, paddingLeft: 20, paddingRight:20,height: 10)
+        brightnessSlider.anchor(top: brightnessValueLabel.bottomAnchor, left: view.safeAreaLayoutGuide.leftAnchor, right: view.safeAreaLayoutGuide.rightAnchor, paddingTop: 10, paddingLeft: 30, paddingRight:30,height: 0.02 * remainingHeight)
         
         view.addSubview(contrastValueLabel)
-        contrastValueLabel.anchor(top: brightnessSlider.bottomAnchor, left: view.safeAreaLayoutGuide.leftAnchor, right: view.safeAreaLayoutGuide.rightAnchor, paddingTop: 10, paddingLeft: 20, paddingRight:20,height:20)
+        contrastValueLabel.anchor(top: brightnessSlider.bottomAnchor, left: view.safeAreaLayoutGuide.leftAnchor, right: view.safeAreaLayoutGuide.rightAnchor, paddingTop: 10, paddingLeft: 30, paddingRight:30, height: 0.05 * remainingHeight)
         
         view.addSubview(contrastSlider)
-        contrastSlider.anchor(top: contrastValueLabel.bottomAnchor, left: view.safeAreaLayoutGuide.leftAnchor, right: view.safeAreaLayoutGuide.rightAnchor, paddingTop: 10, paddingLeft: 20, paddingRight:20,height:10)
+        contrastSlider.anchor(top: contrastValueLabel.bottomAnchor, left: view.safeAreaLayoutGuide.leftAnchor, right: view.safeAreaLayoutGuide.rightAnchor, paddingTop: 10, paddingLeft: 30, paddingRight:30,height:0.02 * remainingHeight)
         
     }
     
