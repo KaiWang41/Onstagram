@@ -12,7 +12,6 @@ class SharePhotoController: UIViewController, CLLocationManagerDelegate, UITextV
     
     let locationManager = CLLocationManager()
     var location: CLLocation?
-    let ciContext = CIContext(options: nil)
     
     var selectedImage: UIImage? {
         didSet {
@@ -37,107 +36,10 @@ class SharePhotoController: UIViewController, CLLocationManagerDelegate, UITextV
         return tv
     }()
     
-    let contrastSlider = UISlider()
-    let brightnessSlider = UISlider()
-    private let contrastValueLabel = UILabel()
-    private let brightnessValueLabel = UILabel()
-    
-    
     override var prefersStatusBarHidden: Bool { return true }
-    
-    // Filter
-    let filtersScrollView = UIScrollView()
-    let imageToFilter = UIImageView()
-    
-    private let filterChoice : UIButton = {
-        let ub = UIButton()
-        ub.setTitle("Filter", for: .normal)
-        ub.titleLabel?.font = UIFont(name:"Times New Roman", size: 20)
-        ub.setTitleColor(.black, for: .normal)
-        ub.frame = CGRect(x: 0, y: 0, width: 50, height: 50)
-        
-        return ub
-    }()
-    
-    private let editChoice : UIButton = {
-        let ub = UIButton()
-        ub.setTitle("Edit", for: .normal)
-        ub.titleLabel?.font = UIFont(name:"Times New Roman", size: 20)
-        ub.setTitleColor(.black, for: .normal)
-        ub.frame = CGRect(x: 0, y: 0, width: 0.5 * UIScreen.main.bounds.width, height: 0.2 * UIScreen.main.bounds.height)
-        
-        return ub
-    }()
-    
-    
-    
-    var CIFilterNames = [
-        "CIPhotoEffectChrome",
-        "CIPhotoEffectFade",
-        "CIPhotoEffectInstant",
-        "CIPhotoEffectNoir",
-        "CIPhotoEffectProcess",
-        "CIPhotoEffectTonal",
-        "CIPhotoEffectTransfer",
-        "CISepiaTone"
-    ]
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = UIColor.rgb(red: 240, green: 240, blue: 240)
-        navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Share", style: .plain, target: self, action: #selector(handleShare))
-        imageToFilter.image = imageView.image
-        
-        brightnessSlider.tag = 0
-        contrastSlider.tag = 1
-        let contrastValue = Int(contrastSlider.value / 200) * 1000
-        contrastValueLabel.text = ("\(contrastValue)")
-        let brightnessValue = Int(brightnessSlider.value / 200) * 1000
-        brightnessValueLabel.text = ("\(brightnessValue)")
-        brightnessSlider.isContinuous = true
-        contrastSlider.isContinuous = true
-        brightnessSlider.addTarget(self, action: #selector(sliderValueDidChange(_:)), for: .valueChanged)
-        contrastSlider.addTarget(self, action: #selector(sliderValueDidChange(_:)), for: .valueChanged)
-        
-        // Filter
-        var xCoord: CGFloat = 5
-        let yCoord: CGFloat = 5
-        let buttonWidth:CGFloat = 70
-        let buttonHeight: CGFloat = 70
-        let gapBetweenButtons: CGFloat = 5
-        
-        
-        var itemCount = 0
-        
-        for i in 0..<CIFilterNames.count {
-            itemCount = i
-            
-            // Button properties
-            let filterButton = UIButton(type: .custom)
-            filterButton.frame = CGRect(origin: CGPoint(x:xCoord, y: yCoord), size: CGSize(width: buttonWidth, height: buttonHeight))
-            filterButton.tag = itemCount
-            filterButton.addTarget(self, action:#selector(filterButtonTapped), for: .touchUpInside)
-            filterButton.layer.cornerRadius = 6
-            filterButton.clipsToBounds = true
-            let coreImage = CIImage(image: imageView.image!)
-            let filter = CIFilter(name: "\(CIFilterNames[i])" )
-            filter!.setDefaults()
-            filter!.setValue(coreImage, forKey: kCIInputImageKey)
-            let filteredImageData = filter!.value(forKey: kCIOutputImageKey) as! CIImage
-            let filteredImageRef = ciContext.createCGImage(filteredImageData, from: filteredImageData.extent)
-            let imageForButton = UIImage(cgImage: filteredImageRef!)
-            filterButton.setBackgroundImage(imageForButton, for: .normal)
-            xCoord +=  buttonWidth + gapBetweenButtons
-            filtersScrollView.addSubview(filterButton)
-        }
-        
-        // Text view
-        textView.delegate = self
-        
-        
-        filtersScrollView.contentSize = CGSize(width:buttonWidth * CGFloat(itemCount+2), height: yCoord)
-        
-        layoutViews()
         
         // Location
         if CLLocationManager.authorizationStatus() != .denied {
@@ -151,6 +53,13 @@ class SharePhotoController: UIViewController, CLLocationManagerDelegate, UITextV
             }
         }
         
+        view.backgroundColor = UIColor.rgb(red: 240, green: 240, blue: 240)
+        navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Share", style: .plain, target: self, action: #selector(handleShare))
+        
+        // Text view
+        textView.delegate = self
+        
+        layoutViews()
     }
     
     // Text view
@@ -162,88 +71,34 @@ class SharePhotoController: UIViewController, CLLocationManagerDelegate, UITextV
         return true
     }
     
-    @objc func sliderValueDidChange(_ sender:UISlider!){
-        if sender.tag == 0{
-            let displayinPercentage: Int = Int((sender.value/200) * 10000)
-            brightnessValueLabel.text = ("\(displayinPercentage)")
-            let beginImage = CIImage(image: imageToFilter.image!)
-            let filter = CIFilter(name: "CIColorControls")
-            filter?.setValue(beginImage, forKey: kCIInputImageKey)
-            filter!.setValue(sender.value, forKey: kCIInputBrightnessKey)
-            let filteredImage = filter?.outputImage
-            imageToFilter.image = UIImage(cgImage: ciContext.createCGImage(filteredImage!, from: (filteredImage?.extent)!)!)
-        }else if sender.tag == 1{
-            let displayinPercentage: Int = Int((sender.value/200) * 10000)
-            contrastValueLabel.text = ("\(displayinPercentage)")
-            let beginImage = CIImage(image: imageToFilter.image!)
-            let filter = CIFilter(name: "CIColorControls")
-            filter?.setValue(beginImage, forKey: kCIInputImageKey)
-            filter!.setValue(sender.value, forKey: kCIInputContrastKey)
-            let filteredImage = filter?.outputImage
-            imageToFilter.image = UIImage(cgImage: ciContext.createCGImage(filteredImage!, from: (filteredImage?.extent)!)!)
-        }
-    }
-    
-    @objc func filterButtonTapped(sender: UIButton) {
-        let button = sender as UIButton
-        
-        imageToFilter.image = button.backgroundImage(for: UIControlState.normal)
-    }
-    
     
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-        
         self.location = manager.location
         manager.stopUpdatingLocation()
     }
     
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
-        
         print("location failure: ", error)
     }
     
-    
-    // Filter
     private func layoutViews() {
         let containerView  = UIView()
         view.addSubview(containerView)
         containerView.anchor(top: view.safeAreaLayoutGuide.topAnchor, left: view.safeAreaLayoutGuide.leftAnchor, right: view.safeAreaLayoutGuide.rightAnchor, height: UIScreen.main.bounds.width )
         
         containerView.addSubview(imageView)
-        imageView.anchor(top: containerView.topAnchor, left: containerView.leftAnchor, bottom: containerView.bottomAnchor, right: containerView.rightAnchor, height:UIScreen.main.bounds.width )
+        imageView.anchor(top: containerView.topAnchor, left: containerView.leftAnchor, width: 100, height: 100)
         
-        containerView.addSubview(imageToFilter)
-        imageToFilter.anchor(top: containerView.topAnchor, left: containerView.leftAnchor, bottom: containerView.bottomAnchor, right: containerView.rightAnchor, height:UIScreen.main.bounds.width )
-        
-        view.addSubview(textView)
-        textView.anchor(top: containerView.bottomAnchor, left: view.safeAreaLayoutGuide.leftAnchor, right: view.safeAreaLayoutGuide.rightAnchor, paddingTop: 10, height:100)
-        
-        view.addSubview(filtersScrollView)
-        filtersScrollView.anchor(top: textView.bottomAnchor, left: view.safeAreaLayoutGuide.leftAnchor, right: view.safeAreaLayoutGuide.rightAnchor, paddingTop: 20, height:70 )
-        
-        
-        view.addSubview(brightnessValueLabel)
-        brightnessValueLabel.anchor(top: filtersScrollView.bottomAnchor, left: view.safeAreaLayoutGuide.leftAnchor, right: view.safeAreaLayoutGuide.rightAnchor, paddingTop: 20, paddingLeft: 20, paddingRight:20, height:20)
-        
-        view.addSubview(brightnessSlider)
-        brightnessSlider.anchor(top: brightnessValueLabel.bottomAnchor, left: view.safeAreaLayoutGuide.leftAnchor, right: view.safeAreaLayoutGuide.rightAnchor, paddingTop: 10, paddingLeft: 20, paddingRight:20,height: 10)
-        
-        view.addSubview(contrastValueLabel)
-        contrastValueLabel.anchor(top: brightnessSlider.bottomAnchor, left: view.safeAreaLayoutGuide.leftAnchor, right: view.safeAreaLayoutGuide.rightAnchor, paddingTop: 10, paddingLeft: 20, paddingRight:20,height:20)
-        
-        view.addSubview(contrastSlider)
-        contrastSlider.anchor(top: contrastValueLabel.bottomAnchor, left: view.safeAreaLayoutGuide.leftAnchor, right: view.safeAreaLayoutGuide.rightAnchor, paddingTop: 10, paddingLeft: 20, paddingRight:20,height:10)
-        
+        containerView.addSubview(textView)
+        textView.anchor(top: containerView.topAnchor, left:  imageView.rightAnchor, right: containerView.rightAnchor, height:100)
     }
     
     @objc private func handleShare() {
-        guard let postImage = imageToFilter.image else { return }
+        guard let postImage = imageView.image else { return }
         guard let caption = textView.text else { return }
         
         navigationItem.rightBarButtonItem?.isEnabled = false
         textView.isUserInteractionEnabled = false
-        
-        
         
         // Location
         var latitude = 90.0
@@ -254,6 +109,7 @@ class SharePhotoController: UIViewController, CLLocationManagerDelegate, UITextV
         }
         
         var place = ""
+        
         func createPost() {
             Database.database().createPost(withImage: postImage, caption: caption, latitude: latitude, longitude: longitude, location: place) { (err) in
                 if err != nil {
@@ -293,9 +149,10 @@ class SharePhotoController: UIViewController, CLLocationManagerDelegate, UITextV
                         if place != "" { place.append(", ")}
                         place.append(country)
                     }
-                    
-                    createPost()
+                
                 }
+                
+                createPost()
             }
         } else {
             createPost()

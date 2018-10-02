@@ -78,9 +78,9 @@ class PhotoSelectorController: UICollectionViewController {
     }
     
     @objc private func handleNext() {
-        let sharePhotoController = SharePhotoController()
-        sharePhotoController.selectedImage = header?.photoImageView.image
-        navigationController?.pushViewController(sharePhotoController, animated: true)
+        let editPhotoController = EditPhotoController()
+        editPhotoController.selectedImage = header?.photoImageView.image
+        navigationController?.pushViewController(editPhotoController, animated: true)
     }
     
     @objc private func handleRefresh() {
