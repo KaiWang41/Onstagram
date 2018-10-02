@@ -18,6 +18,7 @@ class HomeController: HomePostCellViewController, CLLocationManagerDelegate, UII
         case time
         case location
     }
+    var sortType = SortType.time
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -46,7 +47,7 @@ class HomeController: HomePostCellViewController, CLLocationManagerDelegate, UII
         refreshControl.addTarget(self, action: #selector(handleRefresh), for: .valueChanged)
         collectionView?.refreshControl = refreshControl
         
-        fetchAllPosts(sortBy: .time)
+        fetchAllPosts(sortBy: self.sortType)
     }
     
     // Location
@@ -55,6 +56,7 @@ class HomeController: HomePostCellViewController, CLLocationManagerDelegate, UII
         location = manager.location
         manager.stopUpdatingLocation()
         
+        self.sortType = .location
         posts.removeAll()
         fetchAllPosts(sortBy: .location)
     }
@@ -169,7 +171,7 @@ class HomeController: HomePostCellViewController, CLLocationManagerDelegate, UII
     
     @objc private func handleRefresh() {
         posts.removeAll()
-        fetchAllPosts(sortBy: .time)
+        fetchAllPosts(sortBy: sortType)
     }
     
     // Take photo
