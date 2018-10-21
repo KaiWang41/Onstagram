@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		379A8F1E215601170093270F /* Helper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 379A8F1D215601170093270F /* Helper.swift */; };
 		37A8C6902146041000E72122 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 37A8C68F2146041000E72122 /* GoogleService-Info.plist */; };
+		37B24E832162FCD800BA10F3 /* EditPhotoController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37B24E822162FCD800BA10F3 /* EditPhotoController.swift */; };
 		37E075AB2161DE4A00F4608E /* NearbyViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37E075AA2161DE4A00F4608E /* NearbyViewController.swift */; };
 		37E075AD2161DE9200F4608E /* ButtonCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37E075AC2161DE9200F4608E /* ButtonCell.swift */; };
 		7BF997E4E39196FCBF0E4E03 /* Pods_Onstagram.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BE532882A1183F873555FA1A /* Pods_Onstagram.framework */; };
@@ -51,6 +52,7 @@
 		1E31F352E53961776B183A3F /* Pods-Onstagram.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Onstagram.release.xcconfig"; path = "Pods/Target Support Files/Pods-Onstagram/Pods-Onstagram.release.xcconfig"; sourceTree = "<group>"; };
 		379A8F1D215601170093270F /* Helper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Helper.swift; sourceTree = "<group>"; };
 		37A8C68F2146041000E72122 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
+		37B24E822162FCD800BA10F3 /* EditPhotoController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EditPhotoController.swift; sourceTree = "<group>"; };
 		37E075AA2161DE4A00F4608E /* NearbyViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NearbyViewController.swift; sourceTree = "<group>"; };
 		37E075AC2161DE9200F4608E /* ButtonCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ButtonCell.swift; sourceTree = "<group>"; };
 		AD1F3157211B98D100262BF1 /* HomePostHeader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomePostHeader.swift; sourceTree = "<group>"; };
@@ -196,6 +198,7 @@
 				AD32DEC4210BEF6F002F4973 /* PhotoSelectorController.swift */,
 				AD32DEC6210C0995002F4973 /* PhotoSelectorCell.swift */,
 				AD32DEC8210C10A0002F4973 /* PhotoSelectorHeader.swift */,
+				37B24E822162FCD800BA10F3 /* EditPhotoController.swift */,
 				AD32DECA210C18E6002F4973 /* SharePhotoController.swift */,
 			);
 			path = Post;
@@ -286,7 +289,7 @@
 			attributes = {
 				LastSwiftUpdateCheck = 0920;
 				LastUpgradeCheck = 0940;
-				ORGANIZATIONNAME = "Mac Gallagher";
+				ORGANIZATIONNAME = "Group59";
 				TargetAttributes = {
 					AD2A2CAC205C88DE0023D5C8 = {
 						CreatedOnToolsVersion = 9.2;
@@ -384,6 +387,7 @@
 				ADE95AF5210D1B8E003D9A54 /* Post.swift in Sources */,
 				AD215F16205DA9B6000E42AD /* Extensions.swift in Sources */,
 				ADAC080B21102E8D00615E62 /* UserSearchController.swift in Sources */,
+				37B24E832162FCD800BA10F3 /* EditPhotoController.swift in Sources */,
 				ADE95AF7210D1D6E003D9A54 /* UserProfilePhotoGridCell.swift in Sources */,
 				AD2CC6D6211FA0C40091E7D9 /* UserProfileEmptyStateCell.swift in Sources */,
 				ADAC0808210FD4C900615E62 /* FirebaseUtilities.swift in Sources */,
